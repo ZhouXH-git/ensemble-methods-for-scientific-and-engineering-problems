@@ -1,6 +1,6 @@
 # ensemble based learning
 
-Requires OpenFOAM v1912, [DAFI](https://github.com/xiaoh/DAFI), and [Data Driven Turbulence Modeling](https://github.com/cmichelenstrofer/Data-Driven-Turbulence-Modeling)
+Requires OpenFOAM v1912, [DAFI](https://github.com/xiaoh/DAFI), and [Data Driven Turbulence Modeling](https://github.com/cmichelenstrofer/Data-Driven-Turbulence-Modeling). Follow the steps below to configure the environment.
 
 ### OpenFOAM installation
 - Follow steps in [OF1912 Install](https://www.cemf.ir/how-to-install-openfoam-v1912-from-source-pack/)
