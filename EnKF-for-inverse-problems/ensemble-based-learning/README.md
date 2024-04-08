@@ -4,11 +4,11 @@ Requires OpenFOAM v1912, [DAFI](https://github.com/xiaoh/DAFI), and [Data Driven
 
 ### OpenFOAM installation
 - Follow steps in [OF1912 Install](https://www.cemf.ir/how-to-install-openfoam-v1912-from-source-pack/)
-- After installation, source the OpenFOAM 1912 by adding the following in your `~/.bashrc` file:
+- After installation, source the OpenFOAM 1912 by adding the following line in your `~/.bashrc` file:
   <br>`alias of1912 = "source $HOME/OpenFOAM/OpenFOAM-v1912/etc/bashrc"`
 
 ### DAFI installation
-- Source DAFI init file by adding following in your `~/.bashrc` file:
+- Source DAFI init file by adding following line in your `~/.bashrc` file:
   <br>`source $HOME/ensemble-based-learning/code/DAFI/init_dafi`
 
 ### TensorFlow setup
