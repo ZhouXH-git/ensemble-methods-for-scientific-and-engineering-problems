@@ -1,23 +1,23 @@
 # ensemble based learning
 
-Requires [DAFI](https://github.com/xiaoh/DAFI), [Data Driven Turbulence Modeling](https://github.com/cmichelenstrofer/Data-Driven-Turbulence-Modeling) and OpenFOAM v1912
+Requires OpenFOAM v1912, [DAFI](https://github.com/xiaoh/DAFI), and [Data Driven Turbulence Modeling](https://github.com/cmichelenstrofer/Data-Driven-Turbulence-Modeling)
 
-#### OpenFOAM installation
+### OpenFOAM installation
 - Follow steps in [OF1912 Install](https://www.cemf.ir/how-to-install-openfoam-v1912-from-source-pack/)
 - After installation, source the OpenFOAM 1912 by adding the following in your `~/.bashrc` file:
   <br>`alias of1912 = "source $HOME/OpenFOAM/OpenFOAM-v1912/etc/bashrc"`
 
-#### DAFI installation
+### DAFI installation
 - Source DAFI init file by adding following in your `~/.bashrc` file:
   <br>`source $HOME/ensemble-based-learning/code/DAFI/init_dafi`
 
-#### TensorFlow setup
+### TensorFlow setup
 - Install TensorFlow for C, see [TensorFlow for C](https://tensorflow.google.cn/install/lang_c#linux)
 - Install TensorFlow:
   <br> `pip install --upgrade tensorflow`
   <br> `pip install tensorflow-cpu`
 
-#### Data-driven turbulence modeling (DDTM) setup
+### Data-driven turbulence modeling (DDTM) setup
 *Notice*: Turbulence models in OpenFOAM are templated and therefore you cannot compile (new) turbulence models individually. Instead,
 we can make a local copy of the entire TurbulenceModels directory from OpenFOAM and add the (new) turbulence models therein.
 - Make a user copy of TurbulenceModels directory and compile it
@@ -55,9 +55,11 @@ we can make a local copy of the entire TurbulenceModels directory from OpenFOAM 
 
 - Re-make the turbulence models
   ```bash
-  # compile again
   # wmakeLnInclude: create an lnInclude directory for the available turbulence models
   wmakeLnInclude -u turbulenceModels
+
+  # compile again
   ./Allwmake
   ```
+Once you setup the above environment, you will be able to run the Axisymmetric Subsonic Jet (ASJ) case!
   
