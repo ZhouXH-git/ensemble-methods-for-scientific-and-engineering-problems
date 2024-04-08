@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. $HOME/ensemble-based-learning/code/DAFI-v3/DAFI/ensemble-learning/code/utilities/init
+. $HOME/ensemble-based-learning/code/DDTM/code/utilities/init
 
 pretrain.py input.yaml | tee log.pretrain
 
