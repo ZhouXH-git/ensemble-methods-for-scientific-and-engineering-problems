@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dafi (Package) &mdash; dafi 1.0.0 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="dafi.inverse" href="dafi_inverse.html" />
+    <link rel="prev" title="dafi (executable)" href="dafi_exec.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> dafi
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_lorenz.html">Tutorial: Lorenz63</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_diffusion.html">Tutorial: Diffusion</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="source_code.html">Source Code</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dafi_exec.html">dafi (executable)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">dafi (Package)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dafi_inverse.html">dafi.inverse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dafi_fields.html">dafi.random_field</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">dafi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="source_code.html">Source Code</a> &raquo;</li>
+      <li>dafi (Package)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/dafi_package.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="dafi-package">
+<h1>dafi (Package)<a class="headerlink" href="#dafi-package" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dafi_inverse.html">dafi.inverse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dafi_fields.html">dafi.random_field</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dafi_fields_cov.html">dafi.random_field.covariance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dafi_fields_foam.html">dafi.random_field.foam</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<span class="target" id="module-dafi.main"></span><p>DAFI: a Python package for data assimilaton and field inversion.</p>
+<dl class="py function">
+<dt id="dafi.main.run">
+<code class="sig-prename descclassname">dafi.main.</code><code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model_file</span></em>, <em class="sig-param"><span class="n">inverse_method</span></em>, <em class="sig-param"><span class="n">nsamples</span></em>, <em class="sig-param"><span class="n">ntime</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">perturb_obs_option</span><span class="o">=</span><span class="default_value">'iter'</span></em>, <em class="sig-param"><span class="n">obs_err_multiplier</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">analysis_to_obs</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">convergence_option</span><span class="o">=</span><span class="default_value">'max'</span></em>, <em class="sig-param"><span class="n">max_iterations</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">convergence_residual</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">convergence_factor</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">save_level</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">save_dir</span><span class="o">=</span><span class="default_value">'results_dafi'</span></em>, <em class="sig-param"><span class="n">rand_seed</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbosity</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">inputs_inverse</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">inputs_model</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/main.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.main.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run DAFI.</p>
+<p>Accesible through <code class="docutils literal notranslate"><span class="pre">dafi.run()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_file</strong> (<em>str</em>) – Name (path) of dynamic model module/package.</p></li>
+<li><p><strong>inverse_method</strong> (<em>str</em>) – Name of inverse method from dafi.inverse_methods module.</p></li>
+<li><p><strong>nsamples</strong> (<em>int</em>) – Number of samples in ensemble.</p></li>
+<li><p><strong>ntime</strong> (<em>int</em>) – Number of data assimilation times. For stationary use <em>‘1’</em> or
+<em>‘None’</em>. Default <em>‘None’</em>.</p></li>
+<li><p><strong>perturb_obs_option</strong> (<em>str</em>) – Option on when to perturb observations:
+<em>‘iter’</em> to perturb at each iteration (inner loop),
+<em>‘time’</em> to perturb only once each data assimilaton time
+(outer loop),
+<em>‘None’</em> to not perturb observations. Default <em>‘iter’</em>.</p></li>
+<li><p><strong>obs_err_multiplier</strong> (<em>float</em>) – Factor by which to multiply the observation error matrix.
+This is done by some authors in the literature. Default <em>‘1.0’</em>.</p></li>
+<li><p><strong>analysis_to_obs</strong> (<em>bool</em>) – Map analysis state to observation space. Default <em>‘False’</em>.</p></li>
+<li><p><strong>convergence_option</strong> (<em>str</em>) – Convergence criteria to use: <em>‘discrepancy’</em> to use the
+discrepancy principle,  <em>‘residual’</em> to use the iterative
+residual, <em>‘max’</em> to reach the maximum iterations. Default <em>‘max’</em>.</p></li>
+<li><p><strong>max_iterations</strong> (<em>int</em>) – Maximum number of iterations at a given time-step. Default <em>‘1’</em>.</p></li>
+<li><p><strong>convergence_residual</strong> (<em>float</em>) – Residual value for convergence if <em>reach_max</em> is <em>‘False’</em> and
+<em>convergence_option</em> is <em>‘residual’</em>. Default <em>‘None’</em>.</p></li>
+<li><p><strong>convergence_factor</strong> (<em>float</em>) – Factor used in the discrepancy principle convergence option.
+Default <em>‘1.0’</em>.</p></li>
+<li><p><strong>save_level</strong> (<em>str</em>) – Level of results to save: <em>‘None’</em> to not save results,
+<em>‘time’</em> to save results at each data assimilation time step,
+<em>‘iter’</em> to save results at each iteration,
+<em>‘debug’</em> to save additional intermediate quantities.
+Default <em>‘None’</em>.</p></li>
+<li><p><strong>save_dir</strong> (<em>str</em>) – Folder where to save results. Default <em>‘./results_dafi’</em>.</p></li>
+<li><p><strong>rand_seed</strong> (<em>float</em>) – Seed for numpy.random. If None random seed not set.
+Default <em>‘None’</em>.</p></li>
+<li><p><strong>verbosity</strong> (<em>int</em>) – Logging verbosity level, between -1 and 9 (currently -1-3 used).
+For no logging use <em>‘-1’</em>. For debug-level logging use
+<em>‘debug’</em>. Default <em>‘0’</em>.</p></li>
+<li><p><strong>inputs_inverse</strong> (<em>dict</em>) – Inverse method specific inputs.
+Default empty dictionary <em>‘{}’</em>.</p></li>
+<li><p><strong>inputs_model</strong> (<em>dict</em>) – Physics model specific inputs.
+Default empty dictionary <em>‘{}’</em>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>state_analysis_list</strong> – List of analysis states at each DA time. Length is number of
+DA time steps. Each entry is an nd.array containing the ensemble
+analysis states (<span class="math notranslate nohighlight">\(x_a\)</span>) at that time step.
+If only one DA time (e.g. stationary, inversion problem) is the
+single ndarray. Each entry is: <em>dtype=float</em>, <em>ndim=2</em>,
+<em>shape=(nstate, nsamples)</em>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-dafi.physics_model"></span><p>Template for physics models.</p>
+<dl class="py class">
+<dt id="dafi.physics_model.PhysicsModel">
+<em class="property">class </em><code class="sig-prename descclassname">dafi.physics_model.</code><code class="sig-name descname">PhysicsModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/physics_model.html#PhysicsModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.physics_model.PhysicsModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parent class for physics models.</p>
+<p>Accessible through <code class="docutils literal notranslate"><span class="pre">dafi.PhysicsModel</span></code>.
+Use this as a template to write new dynamic models.
+The required attributes and methods are summarized below.</p>
+<p><strong>Attributes</strong></p>
+<ul class="simple">
+<li><p><strong>name</strong> - Name of the forward model for reporting. <em>str</em></p></li>
+<li><p><strong>nstate</strong> - Number of states in the state vector. <em>int</em></p></li>
+<li><p><strong>nobs</strong> - Number of observations in the observation vector.
+<em>int</em></p></li>
+<li><p><strong>init_state</strong> - Initial mean value of the state vector.
+<em>ndarray</em>, <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+<p><strong>Methods</strong></p>
+<p>See the method’s docstring for information on each.</p>
+<ul class="simple">
+<li><p><strong>generate_ensemble</strong></p></li>
+<li><p><strong>forecast_to_time</strong></p></li>
+<li><p><strong>state_to_observation</strong></p></li>
+<li><p><strong>get_obs</strong></p></li>
+</ul>
+<dl class="py method">
+<dt id="dafi.physics_model.PhysicsModel.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/physics_model.html#PhysicsModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.physics_model.PhysicsModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse input file and assign values to class attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs_dafi</strong> (<em>dict</em>) – Dictionary containing all the dafi inputs in case the model
+requires access to this information.</p></li>
+<li><p><strong>inputs</strong> (<em>dict</em>) – Dictionary containing required model inputs.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.physics_model.PhysicsModel.forecast_to_time">
+<code class="sig-name descname">forecast_to_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">time</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/physics_model.html#PhysicsModel.forecast_to_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.physics_model.PhysicsModel.forecast_to_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return states at the next end time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>ndarray</em>) – Current ensemble of states (Xa).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p></li>
+<li><p><strong>time</strong> (<em>int</em>) – Next end time index. Any concept of real time is implemented
+the physics model (e.g. this file).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>state</strong> – Updated ensemble matrix of states (Xf).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.physics_model.PhysicsModel.generate_ensemble">
+<code class="sig-name descname">generate_ensemble</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/physics_model.html#PhysicsModel.generate_ensemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.physics_model.PhysicsModel.generate_ensemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return states at the first data assimilation time-step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>state</strong> – Ensemble matrix of states (X0).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.physics_model.PhysicsModel.get_obs">
+<code class="sig-name descname">get_obs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/physics_model.html#PhysicsModel.get_obs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.physics_model.PhysicsModel.get_obs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the observation and error matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time</strong> (<em>int</em>) – Time index at which observation is requested. Any concept of
+real time is implemented the physics model (e.g. this file).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>obs</strong> (<em>ndarray</em>) – Observations.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nobs, nsamples)</em></p></li>
+<li><p><strong>obs_error</strong> (<em>ndarray</em>) – Observation error (covariance) matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nobs, nobs)</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.physics_model.PhysicsModel.state_to_observation">
+<code class="sig-name descname">state_to_observation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/physics_model.html#PhysicsModel.state_to_observation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.physics_model.PhysicsModel.state_to_observation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map the states to observation space (X to HX).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>ndarray</em>) – Ensemble of states.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>state_obs</strong> – Ensemble in observation space.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nobs, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dafi_exec.html" class="btn btn-neutral float-left" title="dafi (executable)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dafi_inverse.html" class="btn btn-neutral float-right" title="dafi.inverse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2020 Virginia Polytechnic Institute and State University..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

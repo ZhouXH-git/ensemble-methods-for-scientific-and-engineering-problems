@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dafi.random_field.foam &mdash; dafi 1.0.0 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="dafi.random_field.covariance" href="dafi_fields_cov.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> dafi
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_lorenz.html">Tutorial: Lorenz63</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_diffusion.html">Tutorial: Diffusion</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="source_code.html">Source Code</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dafi_exec.html">dafi (executable)</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="dafi_package.html">dafi (Package)</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dafi_inverse.html">dafi.inverse</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="dafi_fields.html">dafi.random_field</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="dafi_fields_cov.html">dafi.random_field.covariance</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">dafi.random_field.foam</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">dafi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="source_code.html">Source Code</a> &raquo;</li>
+          <li><a href="dafi_package.html">dafi (Package)</a> &raquo;</li>
+          <li><a href="dafi_fields.html">dafi.random_field</a> &raquo;</li>
+      <li>dafi.random_field.foam</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/dafi_fields_foam.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="module-dafi.random_field.foam_utilities">
+<span id="dafi-random-field-foam"></span><h1>dafi.random_field.foam<a class="headerlink" href="#module-dafi.random_field.foam_utilities" title="Permalink to this headline">¶</a></h1>
+<p>OpenFOAM I/O.</p>
+<p>These functions are accesible from <code class="docutils literal notranslate"><span class="pre">dafi.random_field.foam</span></code>.</p>
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.foam_header_info">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">foam_header_info</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">foamclass</span></em>, <em class="sig-param"><span class="n">location</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">isfield</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#foam_header_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.foam_header_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the info part of the OpenFOAM file header.</p>
+<p>Used by <a class="reference internal" href="#dafi.random_field.foam_utilities.write_field_file" title="dafi.random_field.foam_utilities.write_field_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_field_file()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Field name (e.g. ‘p’).</p></li>
+<li><p><strong>foamclass</strong> (<em>str</em>) – OpenFOAM class (e.g. ‘scalar’).</p></li>
+<li><p><strong>location</strong> (<em>str</em>) – File location (optional).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>header</strong> – OpenFOAM file header info.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.foam_header_logo">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">foam_header_logo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">foam_version</span></em>, <em class="sig-param"><span class="n">website</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#foam_header_logo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.foam_header_logo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the logo part of the OpenFOAM file header.</p>
+<p>Used by <a class="reference internal" href="#dafi.random_field.foam_utilities.write_field_file" title="dafi.random_field.foam_utilities.write_field_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_field_file()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>foam_version</strong> (<em>str</em>) – OpenFOAM version to write in the header.</p></li>
+<li><p><strong>website</strong> (<em>str</em>) – OpenFOAM website to write in the header.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>header</strong> – OpenFOAM file header logo.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.foam_sep">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">foam_sep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#foam_sep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.foam_sep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a separation comment line.</p>
+<p>Used by <a class="reference internal" href="#dafi.random_field.foam_utilities.write_field_file" title="dafi.random_field.foam_utilities.write_field_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_field_file()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>sep</strong> – Separation comment string</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.get_cell_centres">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">get_cell_centres</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">foam_case</span><span class="o">=</span><span class="default_value">'.'</span></em>, <em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">'internalField'</span></em>, <em class="sig-param"><span class="n">keep_file</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">foam_rc</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#get_cell_centres"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.get_cell_centres" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the coordinates of cell centers in an OpenFOAM case.</p>
+<p>Requires OpenFOAM to be sourced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>foam_case</strong> (<em>str</em>) – Name (path) of OF case directory.</p></li>
+<li><p><strong>keep_file</strong> (<em>bool</em>) – Whether to keep the file (C) generated by the OpenFOAM
+post-processing utility.</p></li>
+<li><p><strong>foam_rc</strong> (<em>str</em>) – File for sourcing OpenFOAM.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>coords</strong> – Cell center coordinates (x, y, z).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(ncells, 3)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.get_cell_volumes">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">get_cell_volumes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">foam_case</span><span class="o">=</span><span class="default_value">'.'</span></em>, <em class="sig-param"><span class="n">keep_file</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">foam_rc</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#get_cell_volumes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.get_cell_volumes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the volume of each cell in an OpenFOAM case.</p>
+<p>Requires OpenFOAM to be sourced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>foam_case</strong> (<em>str</em>) – Name (path) of OF case directory.</p></li>
+<li><p><strong>keep_file</strong> (<em>bool</em>) – Whether to keep the file (V) generated by the OpenFOAM
+post-processing utility.</p></li>
+<li><p><strong>foam_rc</strong> (<em>str</em>) – File for sourcing OpenFOAM.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>vol</strong> – Cell volumes.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.get_neighbors">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">get_neighbors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">foam_case</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#get_neighbors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.get_neighbors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the neighbors of each cell (connectivity).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>foam_case</strong> (<em>str</em>) – Name (path) of OF case directory.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>connectivity</strong> – The keys are cell’s index and the values are a list of indices
+for the cells that neighbor it.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.get_number_cells">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">get_number_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">foam_case</span><span class="o">=</span><span class="default_value">'.'</span></em>, <em class="sig-param"><span class="n">foam_rc</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#get_number_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.get_number_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of cells in an OpenFOAM case.</p>
+<p>Requires OpenFOAM to be sourced, since it calls the <code class="docutils literal notranslate"><span class="pre">checkMesh</span></code>
+utility.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>foam_case</strong> (<em>str</em>) – Name (path) of OF case directory.</p></li>
+<li><p><strong>foam_rc</strong> (<em>str</em>) – File for sourcing OpenFOAM.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ncells</strong> – Number of cells.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.read_cell_centres">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">read_cell_centres</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">'C'</span></em>, <em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">'internalField'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#read_cell_centres"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.read_cell_centres" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read an OpenFOAM mesh coordinate file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.read_field" title="dafi.random_field.foam_utilities.read_field"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_field()</span></code></a> for more information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.read_cell_volumes">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">read_cell_volumes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">'V'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#read_cell_volumes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.read_cell_volumes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read an OpenFOAM mesh volume file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.read_field" title="dafi.random_field.foam_utilities.read_field"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_field()</span></code></a> for more information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.read_field">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">read_field</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">ndim</span></em>, <em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">'internalField'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#read_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.read_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the field values from an OpenFOAM field file.</p>
+<p>Can read either the internal field or a specified boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<em>str</em>) – Name of OpenFOAM field file.</p></li>
+<li><p><strong>ndim</strong> (<em>int</em>) – Field dimension (e.g. 1 for scalar field).</p></li>
+<li><p><strong>group</strong> (<em>str</em>) – Name of the group to read: <em>‘internalField’</em> or name of specific
+boundary.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>data</strong> – Field values on specified group.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(ncells, ndim)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.read_field_file">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">read_field_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#read_field_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.read_field_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a complete OpenFOAM field file.</p>
+<p>This includes header information not just the field values.
+The output can be directly used to write the file again, e.g.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="n">read_field_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">write_field_file</span><span class="p">(</span><span class="o">**</span><span class="n">content</span><span class="p">)</span><span class="o">.</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> (<em>str</em>) – Name (path) of OpenFOAM field file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>info</strong> – The contents of the file organized with the same structure as
+the inputs to the <a class="reference internal" href="#dafi.random_field.foam_utilities.write_field_file" title="dafi.random_field.foam_utilities.write_field_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_field_file()</span></code></a> method. See
+<a class="reference internal" href="#dafi.random_field.foam_utilities.write_field_file" title="dafi.random_field.foam_utilities.write_field_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_field_file()</span></code></a> for more information.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.read_header">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">read_header</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#read_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.read_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the information in an OpenFOAM file header.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> (<em>str</em>) – Name (path) of OpenFOAM file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>info</strong> – The information in the file header.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.read_scalar_field">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">read_scalar_field</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">'internalField'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#read_scalar_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.read_scalar_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read an OpenFOAM scalar field file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.read_field" title="dafi.random_field.foam_utilities.read_field"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_field()</span></code></a> for more information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.read_symmTensor_field">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">read_symmTensor_field</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">'internalField'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#read_symmTensor_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.read_symmTensor_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read an OpenFOAM symmTensor field file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.read_field" title="dafi.random_field.foam_utilities.read_field"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_field()</span></code></a> for more information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.read_tensor_field">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">read_tensor_field</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">'internalField'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#read_tensor_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.read_tensor_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read an OpenFOAM tensor field file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.read_field" title="dafi.random_field.foam_utilities.read_field"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_field()</span></code></a> for more information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.read_vector_field">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">read_vector_field</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">group</span><span class="o">=</span><span class="default_value">'internalField'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#read_vector_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.read_vector_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read an OpenFOAM vector field file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.read_field" title="dafi.random_field.foam_utilities.read_field"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_field()</span></code></a> for more information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.write">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">version</span></em>, <em class="sig-param"><span class="n">fieldname</span></em>, <em class="sig-param"><span class="n">internal_field</span></em>, <em class="sig-param"><span class="n">boundaries</span></em>, <em class="sig-param"><span class="n">location</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write an OpenFOAM field file for one of the pre-specified fields.</p>
+<p>The implemented fields are: ‘p’, ‘k’, ‘epsilon’, ‘omega’, ‘nut’,
+‘Cx’, ‘Cy’, ‘Cz’, ‘V’, ‘U’, ‘C’, ‘Tau’, ‘grad(U)’.
+This calls <a class="reference internal" href="#dafi.random_field.foam_utilities.write_field_file" title="dafi.random_field.foam_utilities.write_field_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_field_file()</span></code></a> but requires less information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>version</strong> (<em>str</em>) – OpenFOAM version. Must be length 1 (e.g. ‘7’) or 4 (e.g. ‘1912’).</p></li>
+<li><p><strong>fieldname</strong> (<em>str</em>) – One of the pre-defined fields.</p></li>
+<li><p><strong>internal_field</strong> (<em>dictionary</em>) – See <a class="reference internal" href="#dafi.random_field.foam_utilities.write_field_file" title="dafi.random_field.foam_utilities.write_field_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_field_file()</span></code></a>.</p></li>
+<li><p><strong>boundaries</strong> (<em>list</em>) – See <a class="reference internal" href="#dafi.random_field.foam_utilities.write_field_file" title="dafi.random_field.foam_utilities.write_field_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_field_file()</span></code></a>.</p></li>
+<li><p><strong>location</strong> (<em>str</em>) – See <a class="reference internal" href="#dafi.random_field.foam_utilities.write_field_file" title="dafi.random_field.foam_utilities.write_field_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_field_file()</span></code></a>.</p></li>
+<li><p><strong>file</strong> (<em>str</em>) – See <a class="reference internal" href="#dafi.random_field.foam_utilities.write_field_file" title="dafi.random_field.foam_utilities.write_field_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_field_file()</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.write_Tau">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">write_Tau</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">version</span></em>, <em class="sig-param"><span class="n">internal</span></em>, <em class="sig-param"><span class="n">boundaries</span></em>, <em class="sig-param"><span class="n">location</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#write_Tau"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.write_Tau" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a Reynolds stress field file.</p>
+<p>See  <a class="reference internal" href="#dafi.random_field.foam_utilities.write" title="dafi.random_field.foam_utilities.write"><code class="xref py py-func docutils literal notranslate"><span class="pre">write()</span></code></a> for more
+information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.write_U">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">write_U</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">version</span></em>, <em class="sig-param"><span class="n">internal</span></em>, <em class="sig-param"><span class="n">boundaries</span></em>, <em class="sig-param"><span class="n">location</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#write_U"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.write_U" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a velocity field file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.write" title="dafi.random_field.foam_utilities.write"><code class="xref py py-func docutils literal notranslate"><span class="pre">write()</span></code></a> for more
+information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.write_controlDict">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">write_controlDict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">content</span></em>, <em class="sig-param"><span class="n">foam_version</span></em>, <em class="sig-param"><span class="n">website</span></em>, <em class="sig-param"><span class="n">ofcase</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#write_controlDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.write_controlDict" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>content</strong> (<em>dict</em>) – Content of controlDict.</p></li>
+<li><p><strong>foam_version</strong> (<em>str</em>) – OpenFOAM version to write in the header.</p></li>
+<li><p><strong>website</strong> (<em>str</em>) – OpenFOAM website to write in the header.</p></li>
+<li><p><strong>ofcase</strong> (<em>str</em>) – OpenFOAM directory. File will be written to
+&lt;ofcase&gt;/system/controlDict. If <em>None</em> file will be written in
+current directory.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>file_loc</strong> (<em>str</em>) – Location (absolute path) of file written.</p></li>
+<li><p><strong>file_content</strong> (<em>str</em>) – Content written to file.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.write_epsilon">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">write_epsilon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">version</span></em>, <em class="sig-param"><span class="n">internal</span></em>, <em class="sig-param"><span class="n">boundaries</span></em>, <em class="sig-param"><span class="n">location</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#write_epsilon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.write_epsilon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a TKE dissipation rate field file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.write" title="dafi.random_field.foam_utilities.write"><code class="xref py py-func docutils literal notranslate"><span class="pre">write()</span></code></a> for more
+information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.write_field_file">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">write_field_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">foam_class</span></em>, <em class="sig-param"><span class="n">dimensions</span></em>, <em class="sig-param"><span class="n">internal_field</span></em>, <em class="sig-param"><span class="n">boundaries</span></em>, <em class="sig-param"><span class="n">foam_version</span></em>, <em class="sig-param"><span class="n">website</span></em>, <em class="sig-param"><span class="n">location</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#write_field_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.write_field_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write an OpenFOAM field file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Field name (e.g. ‘p’).</p></li>
+<li><p><strong>foam_class</strong> (<em>str</em>) – OpenFOAM class (e.g. ‘scalar’).</p></li>
+<li><p><strong>dimensions</strong> (<em>str</em><em> or </em><em>list</em>) – Field dimensions in SI units using OpenFOAM convention
+(e.g. ‘[0 2 -2 0 0 0 0]’).
+Alternatively can be a list of 7 or 3 integers. If three (MLT)
+zeros will be appended at the end, i.e. [M L T 0 0 0 0].</p></li>
+<li><p><strong>internal_field</strong> (<em>dictionary</em>) – Dictionary containing internal field information. See note below
+for more information.</p></li>
+<li><p><strong>boundaries</strong> (<em>list</em>) – List containing one dictionary per boundary. Each dictionary
+contains the required information on that boundary. See note
+below for more information.</p></li>
+<li><p><strong>foam_version</strong> (<em>str</em>) – OpenFOAM version to write in the header.</p></li>
+<li><p><strong>website</strong> (<em>str</em>) – OpenFOAM website to write in the header.</p></li>
+<li><p><strong>location</strong> (<em>str</em>) – File location (optional).</p></li>
+<li><p><strong>file</strong> (<em>str</em>) – File name (path) where to write field. If <em>‘None’</em> will write in
+current directory using the field name as the file name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>file_loc</strong> (<em>str</em>) – Location (absolute path) of file written.</p></li>
+<li><p><strong>file_content</strong> (<em>str</em>) – Content written to file.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl>
+<dt><strong>internal_field</strong></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">internal_field</span></code> dictionary must have the following
+entries:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt><strong>uniform</strong> - <em>bool</em></dt><dd><p>Whether the internal field has uniform or nonuniform
+value.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>value</strong> - <em>float</em> or <em>ndarray</em></dt><dd><p>The uniform or nonuniform values of the internal field.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</dd>
+<dt><strong>boundaries</strong></dt><dd><p>Each boundary dictionary in the <code class="docutils literal notranslate"><span class="pre">boundaries</span></code> list must have
+the following entries:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt><strong>name</strong> - <em>str</em></dt><dd><p>Boundary name.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>type</strong> - <em>str</em></dt><dd><p>Boundary type.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>value</strong> - <em>dict</em> (optional)</dt><dd><p>Dictionary with same entries as the <em>‘internal_field’</em>
+dictionary.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.write_k">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">write_k</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">version</span></em>, <em class="sig-param"><span class="n">internal</span></em>, <em class="sig-param"><span class="n">boundaries</span></em>, <em class="sig-param"><span class="n">location</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#write_k"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.write_k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a turbulent kinetic energy (TKE) field file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.write" title="dafi.random_field.foam_utilities.write"><code class="xref py py-func docutils literal notranslate"><span class="pre">write()</span></code></a> for more
+information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.write_nut">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">write_nut</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">version</span></em>, <em class="sig-param"><span class="n">internal</span></em>, <em class="sig-param"><span class="n">boundaries</span></em>, <em class="sig-param"><span class="n">location</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#write_nut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.write_nut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write an eddy viscosity field file.</p>
+<p>See  <a class="reference internal" href="#dafi.random_field.foam_utilities.write" title="dafi.random_field.foam_utilities.write"><code class="xref py py-func docutils literal notranslate"><span class="pre">write()</span></code></a> for more
+information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.write_omega">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">write_omega</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">version</span></em>, <em class="sig-param"><span class="n">internal</span></em>, <em class="sig-param"><span class="n">boundaries</span></em>, <em class="sig-param"><span class="n">location</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#write_omega"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.write_omega" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a TKE specific dissipation rate field file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.write" title="dafi.random_field.foam_utilities.write"><code class="xref py py-func docutils literal notranslate"><span class="pre">write()</span></code></a> for more
+information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.foam_utilities.write_p">
+<code class="sig-prename descclassname">dafi.random_field.foam_utilities.</code><code class="sig-name descname">write_p</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">version</span></em>, <em class="sig-param"><span class="n">internal</span></em>, <em class="sig-param"><span class="n">boundaries</span></em>, <em class="sig-param"><span class="n">location</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/foam_utilities.html#write_p"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.foam_utilities.write_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a pressure field file.</p>
+<p>See <a class="reference internal" href="#dafi.random_field.foam_utilities.write" title="dafi.random_field.foam_utilities.write"><code class="xref py py-func docutils literal notranslate"><span class="pre">write()</span></code></a> for more
+information.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dafi_fields_cov.html" class="btn btn-neutral float-left" title="dafi.random_field.covariance" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2020 Virginia Polytechnic Institute and State University..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

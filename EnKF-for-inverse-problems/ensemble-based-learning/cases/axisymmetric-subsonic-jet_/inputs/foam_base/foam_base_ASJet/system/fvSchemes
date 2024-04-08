@@ -1,0 +1,95 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default         steadyState;
+}
+
+gradSchemes
+{
+    // defult
+    default         Gauss linear;
+    grad(p)         Gauss linear;
+    grad(U)         Gauss linear;
+
+    // default cellLimited Gauss linear 0.5;
+    // grad(U) faceLimited Gauss linear 1.0;
+}
+
+divSchemes
+{
+    default         Gauss linear;
+
+    // even more accurate but oscillatory scheme if without "bounded"
+    div(phi,U)      bounded Gauss linearUpwind grad(U);
+    div(phi,k)      bounded Gauss limitedLinear 1;
+    div(phi,omega)  bounded Gauss limitedLinear 1;
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+
+    // Add
+    div(U)			Gauss linear;
+	div(u2)			Gauss linear;
+    div(phi,phit)    Gauss upwind;
+    div(phi,f)     Gauss upwind;
+    div(phi,R)      Gauss upwind;
+
+    // accurate and stable 
+    // div(phi,U)      Gauss linearUpwind grad(U);
+    // div(phi,omega)  Gauss linearUpwind grad(omega);
+    // div(phi,k)      Gauss linearUpwind grad(k);
+    // div((nuEff*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    // very good quality mesh with uniform cell size
+    // default Gauss linear orthogonal;
+
+    // default         Gauss linear limited 1;
+
+    // default         Gauss linear uncorrected;
+    // laplacian(DomegaEff,omega) Gauss linear uncorrected;
+
+    default         Gauss linear corrected;
+    laplacian(DomegaEff,omega) Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+    interpolate(U)  linear;
+}
+
+snGradSchemes
+{
+    // default         limited 1;
+
+    // default         uncorrected;
+
+    default         corrected;
+}
+
+wallDist
+{
+    method meshWave;
+    // Optionally correct distance from near-wall cells to the boundary
+    correctWalls    true;
+}
+
+
+// ************************************************************************* //

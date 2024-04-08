@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dafi.random_field.covariance &mdash; dafi 1.0.0 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="dafi.random_field.foam" href="dafi_fields_foam.html" />
+    <link rel="prev" title="dafi.random_field" href="dafi_fields.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> dafi
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_lorenz.html">Tutorial: Lorenz63</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_diffusion.html">Tutorial: Diffusion</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="source_code.html">Source Code</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dafi_exec.html">dafi (executable)</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="dafi_package.html">dafi (Package)</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dafi_inverse.html">dafi.inverse</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="dafi_fields.html">dafi.random_field</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">dafi.random_field.covariance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dafi_fields_foam.html">dafi.random_field.foam</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">dafi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="source_code.html">Source Code</a> &raquo;</li>
+          <li><a href="dafi_package.html">dafi (Package)</a> &raquo;</li>
+          <li><a href="dafi_fields.html">dafi.random_field</a> &raquo;</li>
+      <li>dafi.random_field.covariance</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/dafi_fields_cov.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="module-dafi.random_field.covariance">
+<span id="dafi-random-field-covariance"></span><h1>dafi.random_field.covariance<a class="headerlink" href="#module-dafi.random_field.covariance" title="Permalink to this headline">¶</a></h1>
+<p>Covariance matrices.</p>
+<dl class="py function">
+<dt id="dafi.random_field.covariance.array_to_sparse">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">array_to_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mat</span></em>, <em class="sig-param"><span class="n">tol</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#array_to_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.array_to_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert numpy array to sparse by setting small entries to zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mat</strong> (<em>ndarray</em>) – Numpy array.</p></li>
+<li><p><strong>tol</strong> (<em>float</em>) – Tolerance for sparse matrix. Any entry less than <code class="docutils literal notranslate"><span class="pre">tol</span></code> will
+be set to zero.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>mat_sp</strong> – Matrix converted to sparse matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>csc_matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.covariance.bc_cov">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">bc_cov</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kernel</span><span class="o">=</span><span class="default_value">'sqrexp'</span></em>, <em class="sig-param"><span class="n">stddev</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">sp_tol</span><span class="o">=</span><span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">dirichlet_coords</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">neumann_coords</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">neumann_dir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">int_val</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">int_der</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prior_mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">perturb</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">kernel_kwargs</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#bc_cov"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.bc_cov" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create covariance matrix based on specified kernel and
+enforcing boundary conditions and observations.</p>
+<p>Note: kernel_kwargs must contain coords.</p>
+<dl class="simple">
+<dt>See:</dt><dd><p>Michelén Ströfer, et al. <em>“Enforcing boundary conditions on
+physical fields in Bayesian inversion.”</em> Computer Methods in
+Applied Mechanics and Engineering, 367, 113097, 2020.
+<a class="reference external" href="doi:10.1016/j.cma.2020.113097">doi:10.1016/j.cma.2020.113097</a>.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kernel</strong> (<em>function</em>) – See <em>generate_cov</em>.</p></li>
+<li><p><strong>stddev</strong> (<em>ndarray</em>) – See <em>generate_cov</em>.</p></li>
+<li><p><strong>sp_tol</strong> (<em>float</em>) – See <em>generate_cov</em>.</p></li>
+<li><p><strong>dirichlet_coords</strong> (<em>ndarray</em>) – Coordinates of points where Dirichlet boundary condition is
+enforced (e.g. cell faces).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(npoints, ncoords)</em></p></li>
+<li><p><strong>neumann_coords</strong> (<em>ndarray</em>) – Coordinates of points where Neumann boundary condition is
+enforced (e.g. cell faces).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(npoints, ncoords)</em></p></li>
+<li><p><strong>neumann_dir</strong> (<em>ndarray</em>) – Index of coordinate direction for the gradient.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(npoints)</em></p></li>
+<li><p><strong>int_value</strong> (<em>dictionary</em>) – Dictionary containing the coordinates
+(<em>coords</em>, <em>ndarray</em>, <em>ndim=2</em>, <em>shape=(npoints, ncoords)</em>),
+values (<em>val</em>, <em>ndarray</em>, <em>ndim=1</em>, <em>shape=(npoints)</em>),
+standard deviation
+(<em>stddev</em>, <em>ndarray</em>, <em>ndim=1</em>, <em>shape=(npoints)</em>), and
+baseline (prior, e.g. interpolate from prior mean) values
+(<em>val_base</em>, <em>ndarray</em>, <em>ndim=1</em>, <em>shape=(npoints)</em>),
+of npoints internal value observations.</p></li>
+<li><p><strong>int_der</strong> (<em>dictionary</em>) – Dictionary of internal derivative observations. See <em>int_value</em>.
+Additionally contains the direction (coordinate index)
+(<em>dir</em>, <em>ndarray</em>, <em>ndim=1</em>, <em>shape=(npoints)</em>)</p></li>
+<li><p><strong>prior_mean</strong> (<em>ndarray</em>) – Mean vector prior to enforcing internal observations.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>perturb</strong> (<em>float</em>) – Small quantity to add to a matrix diagonal before inversion.</p></li>
+<li><p><strong>kernel_kwargs</strong> (<em>dictionary</em>) – Keyword arguments for chosen kernel function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Modified mean</p></li>
+<li><p><strong>cov</strong> (<em>scipy.sparse.csc_matrix</em>) – Covariance matrix. See <em>generate_cov</em>.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.covariance.check_mat">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">check_mat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mat</span></em>, <em class="sig-param"><span class="n">type</span><span class="o">=</span><span class="default_value">'cov'</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-08</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#check_mat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.check_mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform checks for correlation or covariance matrices.</p>
+<p>Checks if matrix is symmetric and positive definite. For a
+correlation matrix also checks that the diagonal terms are close to
+1 and the off diagonal have magnitude less than or equal to 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mat</strong> (<em>ndarray</em>) – Correlation or covariance matrix. Can be ndarray, matrix, or
+scipy sparse matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(N, N)</em></p></li>
+<li><p><strong>type</strong> (<em>str</em>) – Matrix type: use ‘corr’ for a correlation matrix and ‘cov’ for a
+covariance matrix.</p></li>
+<li><p><strong>tol</strong> (<em>float</em>) – Tolerance  used when checking if two values are close to  each
+other.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>passed</strong> (<em>bool</em>) – Whether all tests passed succesfully.</p></li>
+<li><p><strong>message</strong> (<em>str</em>) – Information on which tests did not pass.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.covariance.corr_to_cov">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">corr_to_cov</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">corr</span></em>, <em class="sig-param"><span class="n">stddev</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#corr_to_cov"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.corr_to_cov" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a correlation matrix to a covariance matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>corr</strong> (<em>scipy.sparse.csc_matrix</em>) – Correlation matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p></li>
+<li><p><strong>stddev</strong> (<em>ndarray</em>) – Standard deviation of each state. Alternatively, provide a float
+for a constant standard deviation.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>cov</strong> – Covariance matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>scipy.sparse.csc_matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.covariance.cov_to_corr">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">cov_to_corr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cov</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#cov_to_corr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.cov_to_corr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a covariance matrix to a correlation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cov</strong> (<em>ndarray</em>) – Covariance matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>corr</strong> – Correlation matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.covariance.generate_cov">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">generate_cov</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kernel</span><span class="o">=</span><span class="default_value">'sqrexp'</span></em>, <em class="sig-param"><span class="n">stddev</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">sp_tol</span><span class="o">=</span><span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#generate_cov"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.generate_cov" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a covariance matrix using the specified correlatiion
+kernel and standard deviation.</p>
+<p>Additional <em>kwargs</em> are passed to the kernel function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kernel</strong> (<em>function</em>) – Function that returns a correlation matrix. All additional
+arguments are passed to this function. Alternatively, a string
+with the name of one of the implemented kernels.</p></li>
+<li><p><strong>stddev</strong> (<em>ndarray</em>) – Standard deviation of each state. Alternatively, provide a float
+for a constant standard deviation.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>sp_tol</strong> (<em>float</em>) – Tolerance for sparse matrix. Any entry with correlation less
+than <code class="docutils literal notranslate"><span class="pre">sp_tol</span></code> will be set to zero.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>cov</strong> – Covariance matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>scipy.sparse.csc_matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.covariance.kernel_input_file">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">kernel_input_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">Type</span><span class="o">=</span><span class="default_value">'corr'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#kernel_input_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.kernel_input_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a correlation matrix by reading it from a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Name (path) of file containing hte correlation or covariance
+matrix.</p></li>
+<li><p><strong>Type</strong> (<em>str</em>) – The type of matrix contained in the file. Options are ‘corr’ for
+correlation matrix or ‘cov’ for covariance matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>corr</strong> – Correlation matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.covariance.kernel_mixed_periodic_sqrexp">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">kernel_mixed_periodic_sqrexp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coords</span></em>, <em class="sig-param"><span class="n">length_scales</span></em>, <em class="sig-param"><span class="n">factor</span><span class="o">=</span><span class="default_value">6.0</span></em>, <em class="sig-param"><span class="n">period</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#kernel_mixed_periodic_sqrexp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.kernel_mixed_periodic_sqrexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a correlation matrix using the square exponential
+function in some directions and the periodic kernel in others.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> (<em>ndarray</em>) – Array of coordinates. Each row correspond to a different point
+and the number of columns is the number of physical dimensions
+(e.g. 3 for (x,y,z)).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(npoints, ndims)</em></p></li>
+<li><p><strong>length_scales</strong> (<em>list</em>) – Length scale for each physical dimensions. List length is ndims.
+Each entry is either a one dimensional ndarray of length nstate
+(length scale field) or a float (constant length scale).
+For periodic directions the <code class="docutils literal notranslate"><span class="pre">factor</span></code> argument is used (see
+<code class="docutils literal notranslate"><span class="pre">factor</span></code>).</p></li>
+<li><p><strong>factor</strong> (<em>float</em>) – Factor used in the physical interpretation of the periodic
+length scale. The provided lengthscale (<span class="math notranslate nohighlight">\(l\)</span>) is modified as
+<span class="math notranslate nohighlight">\(l = l * factor / p\)</span> where <span class="math notranslate nohighlight">\(p\)</span> is the periodicity.
+A factor of about 6 results in similar physical interpretation
+of the provided length scale as for the non-periodic directions.</p></li>
+<li><p><strong>period</strong> (<em>list</em>) – List of periodicity for each physical dimension (length ndims).
+Each entry is either a float (periodicity) or <em>‘None’</em> for
+non-periodic directions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>corr</strong> – Correlation matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.covariance.kernel_sqrexp">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">kernel_sqrexp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coords</span></em>, <em class="sig-param"><span class="n">length_scales</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#kernel_sqrexp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.kernel_sqrexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a correlation matrix using the square exponential
+function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> (<em>ndarray</em>) – Array of coordinates. Each row correspond to a different point
+and the number of columns is the number of physical dimensions
+(e.g. 3 for (x,y,z)).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(npoints, ndims)</em></p></li>
+<li><p><strong>length_scales</strong> (<em>list</em>) – Length scale for each physical dimensions. List length is ndims.
+Each entry is either a one dimensional ndarray of length nstate
+(length scale field) or a float (constant length scale).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>corr</strong> – Correlation matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.covariance.source_cov_to_output_corr">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">source_cov_to_output_corr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cov</span></em>, <em class="sig-param"><span class="n">weights</span></em>, <em class="sig-param"><span class="n">mat</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#source_cov_to_output_corr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.source_cov_to_output_corr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the input field covariance to the output field
+correlation.</p>
+<p>The input and output field are related by a PDE described by the
+matrix <code class="docutils literal notranslate"><span class="pre">mat</span></code>.
+This is used to create PDE-informed covariance matrices. See:</p>
+<blockquote>
+<div><p>Wu, Jin-Long, et al. <em>“Physics-Informed Covariance Kernel for
+Model-Form Uncertainty Quantification with Application to
+Turbulent Flows.”</em> Computers &amp; Fluids, vol. 193, Oct. 2019,
+p. 104292. <a class="reference external" href="doi:10.1016/j.compfluid.2019.104292">doi:10.1016/j.compfluid.2019.104292</a>.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov</strong> (<em>ndarray</em>) – Covariance matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p></li>
+<li><p><strong>weights</strong> (<em>ndarray</em>) – Weight (e.g. cell volume) associated with each state.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>mat</strong> (<em>ndarray</em>) – Matrix corresponding to the PDE.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>corr</strong> – Correlation structure of output field.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.covariance.sparse_to_nan">
+<code class="sig-prename descclassname">dafi.random_field.covariance.</code><code class="sig-name descname">sparse_to_nan</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mat</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/covariance.html#sparse_to_nan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.covariance.sparse_to_nan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a sparse matrix to a matrix with NaNs instead of zeros.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dafi_fields.html" class="btn btn-neutral float-left" title="dafi.random_field" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dafi_fields_foam.html" class="btn btn-neutral float-right" title="dafi.random_field.foam" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2020 Virginia Polytechnic Institute and State University..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

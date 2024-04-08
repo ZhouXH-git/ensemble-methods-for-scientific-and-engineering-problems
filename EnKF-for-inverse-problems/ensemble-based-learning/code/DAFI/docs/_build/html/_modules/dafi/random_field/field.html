@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dafi.random_field.field &mdash; dafi 1.0.0 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> dafi
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial_lorenz.html">Tutorial: Lorenz63</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial_diffusion.html">Tutorial: Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source_code.html">Source Code</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">dafi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>dafi.random_field.field</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dafi.random_field.field</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot; Random fields representation and manipulation.</span>
+
+<span class="sd">These functions can be called directly from ``dafi.random_field``, e.g.</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">   &gt;&gt;&gt; dafi.random_field.calc_kl_modes(*args)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># standard library imports</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="c1"># third party imports</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span> <span class="k">as</span> <span class="n">sp</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">linalg</span> <span class="k">as</span> <span class="n">splinalg</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">spatial</span>
+
+
+<span class="c1"># KL decomposition</span>
+<div class="viewcode-block" id="calc_kl_modes"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.calc_kl_modes">[docs]</a><span class="k">def</span> <span class="nf">calc_kl_modes</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">nmodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+                  <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the first N Karhunen-Loève modes for a covariance</span>
+<span class="sd">    field.</span>
+
+<span class="sd">    Converts the covariance to a sparse matrix if it is not one yet.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cov : ndarray</span>
+<span class="sd">        Covariance matrix. Can be ndarray, matrix, or scipy sparse</span>
+<span class="sd">        matrix. *dtype=float*, *ndim=2*, *shape=(nstate, nstate)*</span>
+<span class="sd">    nmodes : int</span>
+<span class="sd">        Number of KL modes to obtain.</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Weight (e.g. cell volume) associated with each state.</span>
+<span class="sd">        Default ones (1). *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    eps : float</span>
+<span class="sd">        Small quantity to add to the diagonal of the covariance matrix</span>
+<span class="sd">        for numerical stability.</span>
+<span class="sd">    normalize : bool</span>
+<span class="sd">        Whether to normalize (norm = 1) the KL modes.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eig_vals : ndarray</span>
+<span class="sd">        Eigenvalue associated with each mode.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nmodes)*</span>
+<span class="sd">    kl_modes : ndarray</span>
+<span class="sd">        KL modes (eigenvectors).</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(nstate, nmodes)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># convert to sparse matrix</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+
+    <span class="c1"># default values</span>
+    <span class="n">nstate</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">nmodes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nmodes</span> <span class="o">=</span> <span class="n">nstate</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">weight_field</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">weight_field</span><span class="p">,</span> <span class="n">nstate</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="c1"># add small value to diagonal</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">cov</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">cov</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;csc&#39;</span><span class="p">)</span><span class="o">*</span><span class="n">eps</span>
+
+    <span class="n">weight_field</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">weight_field</span><span class="p">)</span>
+    <span class="n">weight_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">weight_field</span><span class="p">)</span>
+    <span class="n">weight_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">weight_vec</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">weight_vec</span><span class="p">))</span>
+    <span class="n">cov_weighted</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">weight_mat</span><span class="p">)</span>
+
+    <span class="c1"># perform the eig-decomposition</span>
+    <span class="n">eig_vals</span><span class="p">,</span> <span class="n">eig_vecs</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">cov_weighted</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">nmodes</span><span class="p">)</span>
+
+    <span class="c1"># sort the eig-value and eig-vectors in a descending order</span>
+    <span class="n">ascending_order</span> <span class="o">=</span> <span class="n">eig_vals</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+    <span class="n">descending_order</span> <span class="o">=</span> <span class="n">ascending_order</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">eig_vals</span> <span class="o">=</span> <span class="n">eig_vals</span><span class="p">[</span><span class="n">descending_order</span><span class="p">]</span>
+    <span class="n">eig_vecs</span> <span class="o">=</span> <span class="n">eig_vecs</span><span class="p">[:,</span> <span class="n">descending_order</span><span class="p">]</span>
+
+    <span class="c1"># normalized KL modes</span>
+    <span class="n">weight_diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">weight_field</span><span class="p">))</span>
+    <span class="n">kl_modes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">weight_diag</span><span class="p">),</span> <span class="n">eig_vecs</span><span class="p">)</span>  <span class="c1"># normalized</span>
+
+    <span class="c1"># check if negative eigenvalues</span>
+    <span class="k">for</span> <span class="n">imode</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nmodes</span><span class="p">):</span>
+        <span class="n">neg_eigv</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">eig_vals</span><span class="p">[</span><span class="n">imode</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">neg_eigv</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">warn_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Negative eigenvalue for mode </span><span class="si">{</span><span class="n">imode</span><span class="si">}</span><span class="s1">.&#39;</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">warn_message</span><span class="p">)</span>
+            <span class="n">kl_modes</span><span class="p">[:,</span> <span class="n">imode</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">0.</span>
+    <span class="k">if</span> <span class="n">neg_eigv</span><span class="p">:</span>
+        <span class="n">warn_message</span> <span class="o">=</span> <span class="s1">&#39;Some modes have negative eigenvalues. &#39;</span> <span class="o">+</span> \
+            <span class="s1">&#39;The number of KL modes might be too large. &#39;</span> <span class="o">+</span> \
+            <span class="s2">&quot;Alternatively, use a larger value for &#39;eps&#39;.&quot;</span>
+
+    <span class="c1"># weight by appropriate variance</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">normalize</span><span class="p">:</span>
+        <span class="n">kl_modes</span> <span class="o">=</span> <span class="n">scale_kl_modes</span><span class="p">(</span><span class="n">eig_vals</span><span class="p">,</span> <span class="n">kl_modes</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">eig_vals</span><span class="p">,</span> <span class="n">kl_modes</span></div>
+
+
+<div class="viewcode-block" id="calc_kl_modes_coverage"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.calc_kl_modes_coverage">[docs]</a><span class="k">def</span> <span class="nf">calc_kl_modes_coverage</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">coverage</span><span class="p">,</span> <span class="n">weight_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+                           <span class="n">max_modes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate all KL modes and return only those required to achieve</span>
+<span class="sd">    a certain coverage of the variance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cov : ndarray</span>
+<span class="sd">        Covariance matrix. Can be ndarray, matrix, or scipy sparse</span>
+<span class="sd">        matrix. *dtype=float*, *ndim=2*, *shape=(nstate, nstate)*</span>
+<span class="sd">    coverage : float</span>
+<span class="sd">        Desired percentage coverage of the variance. Value between 0-1.</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Weight (e.g. cell volume) associated with each state.</span>
+<span class="sd">        Default ones (1). *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    eps : float</span>
+<span class="sd">        Small quantity to add to the diagonal of the covariance matrix</span>
+<span class="sd">        for numerical stability.</span>
+<span class="sd">    normalize : bool</span>
+<span class="sd">        Whether to normalize (norm = 1) the KL modes.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    eig_vals : ndarray</span>
+<span class="sd">        Eigenvalue associated with each mode. For the first N modes such</span>
+<span class="sd">        that the desired coverage of the variance is achieved.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(N)*</span>
+<span class="sd">    kl_modes : ndarray</span>
+<span class="sd">        first N  KL modes (eigenvectors)  such that the desired coverage</span>
+<span class="sd">        of the variance is achieved.</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(nstate, N)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># convert to sparse matrix</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+
+    <span class="c1"># default values</span>
+    <span class="n">nstate</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">weight_field</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">weight_field</span><span class="p">,</span> <span class="n">nstate</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">max_modes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">max_modes</span> <span class="o">=</span> <span class="n">nstate</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># get the first max_modes KL modes</span>
+    <span class="n">eig_vals</span><span class="p">,</span> <span class="n">kl_modes</span> <span class="o">=</span> <span class="n">calc_kl_modes</span><span class="p">(</span>
+        <span class="n">cov</span><span class="p">,</span> <span class="n">max_modes</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">normalize</span><span class="p">)</span>
+
+    <span class="c1"># return only those KL modes required for desired coverage</span>
+    <span class="n">cummalative_variance</span> <span class="o">=</span> <span class="n">kl_coverage</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">eig_vals</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">)</span>
+    <span class="n">coverage_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">cummalative_variance</span> <span class="o">&gt;=</span> <span class="n">coverage</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">coverage_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">coverage_index</span> <span class="o">=</span> <span class="n">max_modes</span>
+    <span class="k">return</span> <span class="n">eig_vals</span><span class="p">[:</span><span class="n">coverage_index</span><span class="p">],</span> <span class="n">kl_modes</span><span class="p">[:,</span> <span class="p">:</span><span class="n">coverage_index</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="scale_kl_modes"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.scale_kl_modes">[docs]</a><span class="k">def</span> <span class="nf">scale_kl_modes</span><span class="p">(</span><span class="n">eig_vals</span><span class="p">,</span> <span class="n">kl_modes_norm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Weight the KL modes by the appropriate variance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    eig_vals : ndarray</span>
+<span class="sd">        Eigenvalue associated with each mode.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nmodes)*</span>
+<span class="sd">    kl_modes_norm : ndarray</span>
+<span class="sd">        Normalized (norm = 1) KL modes (eigenvectors).</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(nstate, nmodes)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    kl_modes_weighted : ndarray</span>
+<span class="sd">        KL modes with correct magnitude.</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(nstate, nmodes)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nmodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">eig_vals</span><span class="p">)</span>
+    <span class="n">kl_modes_weighted</span> <span class="o">=</span> <span class="n">kl_modes_norm</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">imode</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nmodes</span><span class="p">):</span>
+        <span class="n">kl_modes_weighted</span><span class="p">[:,</span> <span class="n">imode</span><span class="p">]</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eig_vals</span><span class="p">[</span><span class="n">imode</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">kl_modes_weighted</span></div>
+
+
+<div class="viewcode-block" id="kl_coverage"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.kl_coverage">[docs]</a><span class="k">def</span> <span class="nf">kl_coverage</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">eig_vals</span><span class="p">,</span> <span class="n">weight_field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the percentage of the covariance covered by the the</span>
+<span class="sd">    first N KL modes for N from 1-nmodes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cov : ndarray</span>
+<span class="sd">        Covariance matrix. Can be ndarray, matrix, or scipy sparse</span>
+<span class="sd">        matrix. *dtype=float*, *ndim=2*, *shape=(nstate, nstate)*</span>
+<span class="sd">    eig_vals : ndarray</span>
+<span class="sd">        Eigenvalues associated with each mode.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nmodes)*</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Weight (e.g. cell volume) associated with each state.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    coverage: ndarray</span>
+<span class="sd">        Cumulative variance coverage of the first N modes. Each value</span>
+<span class="sd">        is 0-1 and increasing.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nmodes)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># make sparse if its not already</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+
+    <span class="c1"># default values</span>
+    <span class="n">nstate</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">weight_field</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">weight_field</span><span class="p">,</span> <span class="n">nstate</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="c1"># calculate coverage</span>
+    <span class="n">weight_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">weight_field</span><span class="p">)</span>
+    <span class="n">weight_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">weight_vec</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">weight_vec</span><span class="p">))</span>
+    <span class="n">cov_weighted</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">weight_mat</span><span class="p">)</span>
+    <span class="n">cov_trace</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cov_weighted</span><span class="o">.</span><span class="n">diagonal</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">eig_vals</span><span class="p">)</span> <span class="o">/</span> <span class="n">cov_trace</span></div>
+
+
+<div class="viewcode-block" id="reconstruct_kl"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.reconstruct_kl">[docs]</a><span class="k">def</span> <span class="nf">reconstruct_kl</span><span class="p">(</span><span class="n">modes</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Reconstruct a field using KL modes and given coefficients.</span>
+
+<span class="sd">    Can create multiple fields by providing two dimensional array of</span>
+<span class="sd">    coefficients.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    modes : ndarray</span>
+<span class="sd">        KL modes. *dtype=float*, *ndim=2*, *shape=(nstate, nmodes)*</span>
+<span class="sd">    coeffs : ndarray</span>
+<span class="sd">        Array of coefficients.</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(nmodes, nsamples)*</span>
+<span class="sd">    mean : ndarray</span>
+<span class="sd">        Mean vector. *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fields : ndarray</span>
+<span class="sd">        Reconstructed fields.</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># number of modes, samples, and states</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coeffs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">nmodes</span><span class="p">,</span> <span class="n">nsamps</span> <span class="o">=</span> <span class="n">coeffs</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">nstate</span> <span class="o">=</span> <span class="n">modes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># mean vector</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">nstate</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">mean</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># create samples</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="p">[</span><span class="n">nsamps</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">imode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmodes</span><span class="p">):</span>
+        <span class="n">vec1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="n">imode</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">vec2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">modes</span><span class="p">[:,</span> <span class="n">imode</span><span class="p">])</span>
+        <span class="n">fields</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vec1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">vec2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">fields</span></div>
+
+
+<div class="viewcode-block" id="project_kl"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.project_kl">[docs]</a><span class="k">def</span> <span class="nf">project_kl</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">modes</span><span class="p">,</span> <span class="n">weight_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Project a field onto a set of modes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field : ndarray</span>
+<span class="sd">        Scalar field. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    modes : ndarray</span>
+<span class="sd">        KL modes. *dtype=float*, *ndim=2*, *shape=(nstate, nmodes)*</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Weight (e.g. cell volume) associated with each state.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    mean : ndarray</span>
+<span class="sd">        Mean vector. *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    coeffs : ndarray</span>
+<span class="sd">        Projection magnitude.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nmodes)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nstate</span><span class="p">,</span> <span class="n">nmode</span> <span class="o">=</span> <span class="n">modes</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">nstate</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">imode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmode</span><span class="p">):</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">modes</span><span class="p">[:,</span> <span class="n">imode</span><span class="p">]</span>
+        <span class="n">coeffs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">projection_magnitude</span><span class="p">(</span><span class="n">field</span><span class="o">-</span><span class="n">mean</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_preprocess_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">nstate</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pre-process provided weight field. &quot;&quot;&quot;</span>
+    <span class="c1"># default value</span>
+    <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nstate</span><span class="p">)</span><span class="o">*</span><span class="n">default</span>
+    <span class="c1"># constant value</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">field</span><span class="p">))))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nstate</span><span class="p">)</span><span class="o">*</span><span class="n">field</span>
+    <span class="k">return</span> <span class="n">field</span>
+
+
+<span class="c1"># linear algebra on scalar fields</span>
+<div class="viewcode-block" id="integral"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.integral">[docs]</a><span class="k">def</span> <span class="nf">integral</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the integral of a field.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field : ndarray</span>
+<span class="sd">        Scalar field. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Cell volumes. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    field_integral : float</span>
+<span class="sd">        The integral of the field over the domain.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">field</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">field</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="n">nstate</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+    <span class="n">weight_field</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">weight_field</span><span class="p">,</span> <span class="n">nstate</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">field</span> <span class="o">*</span> <span class="n">weight_field</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="inner_product"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.inner_product">[docs]</a><span class="k">def</span> <span class="nf">inner_product</span><span class="p">(</span><span class="n">field_1</span><span class="p">,</span> <span class="n">field_2</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the inner product between two fields.</span>
+
+<span class="sd">    The two fields share the same weights.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field_1 : ndarray</span>
+<span class="sd">        One scalar field. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    field_2 : ndarray</span>
+<span class="sd">        Another scalar field.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Cell volumes. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    product : float</span>
+<span class="sd">        The inner product between the two fields.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">integral</span><span class="p">(</span><span class="n">field_1</span> <span class="o">*</span> <span class="n">field_2</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="norm"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.norm">[docs]</a><span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the L2-norm of a field.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field : ndarray</span>
+<span class="sd">        Scalar field. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Cell volumes. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    field_norm : float</span>
+<span class="sd">        The norm of the field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">inner_product</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="unit_field"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.unit_field">[docs]</a><span class="k">def</span> <span class="nf">unit_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the unit field (norm = 1) in same direction.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field : ndarray</span>
+<span class="sd">        Scalar field. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Cell volumes. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    field_normed : ndarray</span>
+<span class="sd">        Normalized (norm = 1) scalar field.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">field</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="projection_magnitude"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.projection_magnitude">[docs]</a><span class="k">def</span> <span class="nf">projection_magnitude</span><span class="p">(</span><span class="n">field_1</span><span class="p">,</span> <span class="n">field_2</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get magnitude of projection of field_1 onto field_2.</span>
+
+<span class="sd">    The two fields share the same weights.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field_1 : ndarray</span>
+<span class="sd">        Scalar field being projected.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    field_2 : ndarray</span>
+<span class="sd">        Scalar field used for projection direction.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Cell volumes.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    magnitude : float</span>
+<span class="sd">        magnitude of the projected field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">magnitude</span> <span class="o">=</span> <span class="n">inner_product</span><span class="p">(</span><span class="n">field_1</span><span class="p">,</span> <span class="n">field_2</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">)</span> <span class="o">/</span> \
+        <span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">field_2</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">magnitude</span></div>
+
+
+<div class="viewcode-block" id="projection"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.projection">[docs]</a><span class="k">def</span> <span class="nf">projection</span><span class="p">(</span><span class="n">field_1</span><span class="p">,</span> <span class="n">field_2</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Project field_1 onto field_2.</span>
+
+<span class="sd">    The two fields share the same weights.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field_1 : ndarray</span>
+<span class="sd">        Scalar field being projected.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    field_2 : ndarray</span>
+<span class="sd">        Scalar field used for projection direction.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Cell volumes.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    projected_field : ndarray</span>
+<span class="sd">        Projected field.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">magnitude</span> <span class="o">=</span> <span class="n">projection_magnitude</span><span class="p">(</span><span class="n">field_1</span><span class="p">,</span> <span class="n">field_2</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">)</span>
+    <span class="n">direction</span> <span class="o">=</span> <span class="n">unit_field</span><span class="p">(</span><span class="n">field_2</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">magnitude</span><span class="o">*</span><span class="n">direction</span></div>
+
+
+<span class="c1"># interpolation</span>
+<div class="viewcode-block" id="interpolate_field_rbf"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.interpolate_field_rbf">[docs]</a><span class="k">def</span> <span class="nf">interpolate_field_rbf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Interpolate data using a radial basis function (RBF) to create a</span>
+<span class="sd">    field from sparse specifications.</span>
+
+<span class="sd">    This is used for instance to specify a variance field based on</span>
+<span class="sd">    expert knowledge.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : ndarray</span>
+<span class="sd">        Sparse data to create interpolation from. For an NxM array, the</span>
+<span class="sd">        number of data points is N, the number of dimensions</span>
+<span class="sd">        (coordinates) is M-1, and the Mth column is the data value.</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(N, M)*</span>
+<span class="sd">    coords : ndarray</span>
+<span class="sd">        Coordinates of the cell centers of the full discretized field.</span>
+<span class="sd">        The RBF will be evaluated at these points.</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(ncells, M-1)*</span>
+<span class="sd">    kernel : str</span>
+<span class="sd">        Kernel (function) of the RBF. See *&#39;function&#39;* input of</span>
+<span class="sd">        `scipy.interpolate.Rbf`_ for list of options.</span>
+<span class="sd">    length_scale : float</span>
+<span class="sd">        Length scale parameter (epsilon in `scipy.interpolate.Rbf`_)</span>
+<span class="sd">        in the RBF kernel.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    field : ndarray</span>
+<span class="sd">        Full field. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">args2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ncoord</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">icoord</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncoord</span><span class="p">):</span>
+        <span class="n">args1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="n">icoord</span><span class="p">])</span>
+        <span class="n">args2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="n">icoord</span><span class="p">])</span>
+    <span class="n">interp_func</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">Rbf</span><span class="p">(</span>
+        <span class="o">*</span><span class="n">args1</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="n">length_scale</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">interp_func</span><span class="p">(</span><span class="o">*</span><span class="n">args2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="inverse_distance_weights"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.inverse_distance_weights">[docs]</a><span class="k">def</span> <span class="nf">inverse_distance_weights</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create linear interpolation matrix (observation operatror H).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># get host cell (cell centre closest to point)</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">spatial</span><span class="o">.</span><span class="n">cKDTree</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">distances</span><span class="p">,</span> <span class="n">indexes</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">points</span><span class="p">))</span>
+
+    <span class="n">npoints</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ncells</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># calculate weights</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">lil_matrix</span><span class="p">((</span><span class="n">npoints</span><span class="p">,</span> <span class="n">ncells</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npoints</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">distances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+            <span class="c1"># if location is cell centre</span>
+            <span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">neighbours</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="n">connectivity</span><span class="p">[</span><span class="nb">id</span><span class="p">],</span> <span class="p">:]</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">spatial</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">neighbours</span><span class="p">)</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">dist</span>
+            <span class="n">wsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">distances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">weight</span> <span class="o">/=</span> <span class="n">wsum</span>
+            <span class="c1"># host cell</span>
+            <span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">distances</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">wsum</span>
+            <span class="c1"># neighbour cells</span>
+            <span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">[</span><span class="nb">id</span><span class="p">]]</span> <span class="o">=</span> <span class="n">weight</span>
+    <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span></div>
+
+
+<span class="c1"># Gaussian process: generate samples</span>
+<div class="viewcode-block" id="gp_samples_cholesky"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.gp_samples_cholesky">[docs]</a><span class="k">def</span> <span class="nf">gp_samples_cholesky</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generate samples of a Gaussian Process using Cholesky</span>
+<span class="sd">    decomposition.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cov : ndarray</span>
+<span class="sd">        Covariance matrix. Can be ndarray, matrix, or scipy sparse</span>
+<span class="sd">        matrix. *dtype=float*, *ndim=2*, *shape=(nstate, nstate)*</span>
+<span class="sd">    nsamples : int</span>
+<span class="sd">        Number of samples to generate.</span>
+<span class="sd">    mean : ndarray</span>
+<span class="sd">        Mean vector. *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    eps : float</span>
+<span class="sd">        Small quantity to add to the diagonal of the covariance matrix</span>
+<span class="sd">        for numerical stability.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    samples : ndarray</span>
+<span class="sd">        Matrix of samples.</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># make sparse if its not already</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+    <span class="n">nstate</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># add small value to diagonal</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">cov</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">nstate</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;csc&#39;</span><span class="p">)</span><span class="o">*</span><span class="n">eps</span>
+
+    <span class="c1"># mean vector</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">nstate</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">mean</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Create samples using Cholesky Decomposition</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">sparse_cholesky</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">nstate</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">))</span>
+    <span class="n">perturb</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mean</span> <span class="o">+</span> <span class="n">perturb</span></div>
+
+
+<div class="viewcode-block" id="sparse_cholesky"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.sparse_cholesky">[docs]</a><span class="k">def</span> <span class="nf">sparse_cholesky</span><span class="p">(</span><span class="n">cov</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Compute the Cholesky decomposition for a sparse (scipy) matrix.</span>
+
+<span class="sd">    Adapted from `gist.github.com/omitakahiro`_.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cov : ndarray</span>
+<span class="sd">      Covariance matrix. Can be ndarray, matrix, or scipy sparse</span>
+<span class="sd">      matrix. *dtype=float*, *ndim=2*, *shape=(nstate, nstate)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    lower: scipy.sparse.csc_matrix</span>
+<span class="sd">        Lower triangular Cholesky factor of the covariance matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># convert to sparse matrix</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+
+    <span class="c1"># LU decomposition</span>
+    <span class="n">LU</span> <span class="o">=</span> <span class="n">splinalg</span><span class="o">.</span><span class="n">splu</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">diag_pivot_thresh</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># check the matrix is positive definite.</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">posd</span> <span class="o">=</span> <span class="p">(</span><span class="n">LU</span><span class="o">.</span><span class="n">perm_r</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">LU</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">posd</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The matrix is not positive definite&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">LU</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span><span class="n">LU</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()</span><span class="o">**</span><span class="mf">0.5</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="gp_samples_kl"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.gp_samples_kl">[docs]</a><span class="k">def</span> <span class="nf">gp_samples_kl</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">,</span> <span class="n">nmodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generate samples of a Gaussian Process using KL decomposition.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cov : ndarray</span>
+<span class="sd">        Covariance matrix. Can be ndarray, matrix, or scipy sparse</span>
+<span class="sd">        matrix. *dtype=float*, *ndim=2*, *shape=(nstate, nstate)*</span>
+<span class="sd">    nsamples : int</span>
+<span class="sd">        Number of samples to generate.</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Weight (e.g. cell volume) associated with each state.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    nmodes : int</span>
+<span class="sd">        Number of modes to use when generating samples. *&#39;None&#39;* to use</span>
+<span class="sd">        all modes.</span>
+<span class="sd">    mean : ndarray</span>
+<span class="sd">        Mean vector. *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    eps : float</span>
+<span class="sd">        Small quantity to add to the diagonal of the covariance matrix</span>
+<span class="sd">        for numerical stability.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    samples : ndarray</span>
+<span class="sd">        Matrix of samples.</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># KL decomposition</span>
+    <span class="n">eigv</span><span class="p">,</span> <span class="n">modes</span> <span class="o">=</span> <span class="n">calc_kl_modes</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">nmodes</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nmodes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nmodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">eigv</span><span class="p">)</span>
+
+    <span class="c1"># create samples</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">nmodes</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">reconstruct_kl</span><span class="p">(</span><span class="n">modes</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">mean</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="gp_samples_klmodes"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.gp_samples_klmodes">[docs]</a><span class="k">def</span> <span class="nf">gp_samples_klmodes</span><span class="p">(</span><span class="n">modes</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generate samples of a Gaussian Process using the given KL</span>
+<span class="sd">    modes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    modes : ndarray</span>
+<span class="sd">        KL modes. *dtype=float*, *ndim=2*, *shape=(nstate, nmodes)*</span>
+<span class="sd">    nsamples : int</span>
+<span class="sd">        Number of samples to generate.</span>
+<span class="sd">    mean : ndarray</span>
+<span class="sd">        Mean vector. *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    samples : ndarray</span>
+<span class="sd">        Matrix of samples.</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># create samples</span>
+    <span class="n">nmodes</span> <span class="o">=</span> <span class="n">modes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">nmodes</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">reconstruct_kl</span><span class="p">(</span><span class="n">modes</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">mean</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="gp_samples_kl_coverage"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.gp_samples_kl_coverage">[docs]</a><span class="k">def</span> <span class="nf">gp_samples_kl_coverage</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">,</span> <span class="n">coverage</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
+                           <span class="n">max_modes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generate samples of a Gaussian Process using KL decomposition.</span>
+
+<span class="sd">    Only the firs N modes required to get the desired variance coverage</span>
+<span class="sd">    are used.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cov : ndarray</span>
+<span class="sd">        Covariance matrix. Can be ndarray, matrix, or scipy sparse</span>
+<span class="sd">        matrix. *dtype=float*, *ndim=2*, *shape=(nstate, nstate)*</span>
+<span class="sd">    nsamples : int</span>
+<span class="sd">        Number of samples to generate.</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Weight (e.g. cell volume) associated with each state.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    coverage : float</span>
+<span class="sd">        Desired percentage coverage of the variance. Value between 0-1.</span>
+<span class="sd">    max_modes : int</span>
+<span class="sd">        Maximum number of modes used. This is the number of modes that</span>
+<span class="sd">        is calculated. If less are needed to achieve the desired</span>
+<span class="sd">        coverage the additional ones are discarded.</span>
+<span class="sd">    mean : ndarray</span>
+<span class="sd">        Mean vector. *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    eps : float</span>
+<span class="sd">        Small quantity to add to the diagonal of the covariance matrix</span>
+<span class="sd">        for numerical stability.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    samples : ndarray</span>
+<span class="sd">        Matrix of samples.</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">    nmodes : int</span>
+<span class="sd">        Number of modes used to achieve the requested coverage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># KL decomposition</span>
+    <span class="n">eigv</span><span class="p">,</span> <span class="n">klmodes</span> <span class="o">=</span> <span class="n">calc_kl_modes_coverage</span><span class="p">(</span>
+        <span class="n">cov</span><span class="p">,</span> <span class="n">coverage</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">max_modes</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">nmodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">eigv</span><span class="p">)</span>
+
+    <span class="c1"># create samples</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">nmodes</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">reconstruct_kl</span><span class="p">(</span><span class="n">klmodes</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">mean</span><span class="p">),</span> <span class="n">nmodes</span></div>
+
+
+<div class="viewcode-block" id="gp_sqrexp_samples"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.gp_sqrexp_samples">[docs]</a><span class="k">def</span> <span class="nf">gp_sqrexp_samples</span><span class="p">(</span><span class="n">nsamples</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">stddev</span><span class="p">,</span> <span class="n">length_scales</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">weight_field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_modes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generate samples from a Gaussian Process with square exponential</span>
+<span class="sd">    correlation kernel.</span>
+
+<span class="sd">    This is a convinience function for new users or simple cases.</span>
+<span class="sd">    It create the covariance matrix, does the KL decomposition, keeps</span>
+<span class="sd">    the required modes for 99% coverage, and create the samples.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nsamples : int</span>
+<span class="sd">        Number of samples to generate.</span>
+<span class="sd">    coords : ndarray</span>
+<span class="sd">        Array of coordinates. Each row correspond to a different point</span>
+<span class="sd">        and the number of columns is the number of physical dimensions</span>
+<span class="sd">        (e.g. 3 for (x,y,z)).</span>
+<span class="sd">        *dtype=float*, *ndim=2*, *shape=(npoints, ndims)*</span>
+<span class="sd">    stddev : ndarray</span>
+<span class="sd">        Standard deviation of each state. Alternatively, provide a float</span>
+<span class="sd">        for a constant standard deviation.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    length_scales : list</span>
+<span class="sd">        Length scale for each physical dimensions. List length is ndims.</span>
+<span class="sd">        Each entry is either a one dimensional ndarray of length nstate</span>
+<span class="sd">        (length scale field) or a float (constant length scale).</span>
+<span class="sd">    mean : ndarray</span>
+<span class="sd">        Mean vector. *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    weight_field : ndarray</span>
+<span class="sd">        Weight (e.g. cell volume) associated with each state.</span>
+<span class="sd">        *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+<span class="sd">    max_modes : int</span>
+<span class="sd">        Maximum number of modes used. This is the number of modes that</span>
+<span class="sd">        is calculated. If less are needed to achieve 99% coverage the</span>
+<span class="sd">        additional ones are discarded.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">dafi.random_field.covariance</span> <span class="kn">import</span> <span class="n">generate_cov</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">generate_cov</span><span class="p">(</span>
+        <span class="s1">&#39;sqrexp&#39;</span><span class="p">,</span> <span class="n">stddev</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">length_scales</span><span class="o">=</span><span class="n">length_scales</span><span class="p">)</span>
+    <span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">gp_samples_kl_coverage</span><span class="p">(</span>
+        <span class="n">cov</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">,</span> <span class="n">weight_field</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="n">max_modes</span><span class="p">,</span> <span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">samples</span></div>
+
+
+<span class="c1"># Random field class</span>
+<div class="viewcode-block" id="GaussianProcess"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess">[docs]</a><span class="k">class</span> <span class="nc">GaussianProcess</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Gaussian process class. </span>
+
+<span class="sd">    Also allows for the creation of a function of a Gaussian process. </span>
+<span class="sd">    E.g. see *&#39;Lognormal&#39;* class. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GaussianProcess.__init__"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">klmodes</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">funcinv</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize Gaussian process class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        klmodes : ndarray</span>
+<span class="sd">            KL modes (eigenvectors).</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nmodes)*</span>
+
+<span class="sd">        mean : ndarray</span>
+<span class="sd">            Mean vector. Default zero (0). </span>
+<span class="sd">            *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">        weights : ndarray</span>
+<span class="sd">            Weight (e.g. cell volume) associated with each state.</span>
+<span class="sd">            Default ones (1). *dtype=float*, *ndim=1*, *shape=(nstate)* </span>
+
+<span class="sd">        func: function</span>
+<span class="sd">            Function to create a random process that is a function of </span>
+<span class="sd">            a Gaussian process. Default is identity function (GP). </span>
+
+<span class="sd">        funcinv: function</span>
+<span class="sd">            Inverse of func. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nstate</span> <span class="o">=</span> <span class="n">klmodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">klmodes</span> <span class="o">=</span> <span class="n">klmodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncell</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">klmodes</span><span class="o">.</span><span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncell</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">nstate</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">func_identity</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">x</span>
+
+        <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">func_identity</span>
+        <span class="k">if</span> <span class="n">funcinv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">funcinv</span> <span class="o">=</span> <span class="n">func_identity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">funcinv</span> <span class="o">=</span> <span class="n">funcinv</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.sample_coeffs"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess.sample_coeffs">[docs]</a>    <span class="k">def</span> <span class="nf">sample_coeffs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create Karhunen-Loève (KL) coefficents for random samples. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nsamples : int</span>
+<span class="sd">            Number of samples for which to generate KL coefficients.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        coeffs : ndarray</span>
+<span class="sd">            Matrix of samples KL coefficients for the Gaussian process. </span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.sample_gp"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess.sample_gp">[docs]</a>    <span class="k">def</span> <span class="nf">sample_gp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Generate samples of the Gaussian process. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nsamples : int</span>
+<span class="sd">            Number of samples to generate. </span>
+
+<span class="sd">        mean : ndarray</span>
+<span class="sd">            Mean vector. If *None*, self.mean is used. </span>
+<span class="sd">            *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        samples : ndarray</span>
+<span class="sd">            Sample fields from Gaussian process.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+
+<span class="sd">        coeffs : ndarray</span>
+<span class="sd">            Matrix of samples KL coefficients for the Gaussian process. </span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+        <span class="n">coeffs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_coeffs</span><span class="p">(</span><span class="n">nsamples</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reconstruct_kl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">klmodes</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">mean</span><span class="p">),</span> <span class="n">coeffs</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.sample_func"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess.sample_func">[docs]</a>    <span class="k">def</span> <span class="nf">sample_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Generate samples of the function of the Gaussian process. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nsamples : int</span>
+<span class="sd">            Number of samples to generate. </span>
+
+<span class="sd">        mean : ndarray</span>
+<span class="sd">            Mean vector. If *None*, self.mean is used. </span>
+<span class="sd">            *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        samples : ndarray</span>
+<span class="sd">            Sample fields from the function of the Gaussian process.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+        <span class="n">coeffs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_coeffs</span><span class="p">(</span><span class="n">nsamples</span><span class="p">)</span>
+        <span class="n">samps_gp</span> <span class="o">=</span> <span class="n">reconstruct_kl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">klmodes</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">mean</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">samps_gp</span><span class="p">),</span> <span class="n">coeffs</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.reconstruct_gp"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess.reconstruct_gp">[docs]</a>    <span class="k">def</span> <span class="nf">reconstruct_gp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reconstruct the Gaussian process field from given </span>
+<span class="sd">        KL coefficients.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coeffs : ndarray</span>
+<span class="sd">            Array of KL coefficients.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nmodes, nsamples)*</span>
+<span class="sd">        mean : ndarray</span>
+<span class="sd">            Mean vector. If *None*, self.mean is used. </span>
+<span class="sd">            *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fields : ndarray</span>
+<span class="sd">            Reconstructed fields.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+        <span class="k">return</span> <span class="n">reconstruct_kl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">klmodes</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">mean</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.reconstruct_func"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess.reconstruct_func">[docs]</a>    <span class="k">def</span> <span class="nf">reconstruct_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reconstruct the function of the Gaussian process field </span>
+<span class="sd">        from given KL coefficients.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coeffs : ndarray</span>
+<span class="sd">            Array of KL coefficients.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nmodes, nsamples)*</span>
+<span class="sd">        mean : ndarray</span>
+<span class="sd">            Mean vector. If *None*, self.mean is used. </span>
+<span class="sd">            *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fields : ndarray</span>
+<span class="sd">            Reconstructed fields.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+        <span class="n">val_gp</span> <span class="o">=</span> <span class="n">reconstruct_kl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">klmodes</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">,</span> <span class="n">mean</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">val_gp</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.pdf"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess.pdf">[docs]</a>    <span class="k">def</span> <span class="nf">pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Probaility density function (PDF). </span>
+
+<span class="sd">        PDF(x) where x is a field (point in sample space) specified by </span>
+<span class="sd">        KL coeffiecients. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coeffs : ndarray</span>
+<span class="sd">            Array of KL coefficients.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nmodes, nsamples)*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pdf : ndarray</span>
+<span class="sd">            Value of the PDF function for the given point in the sample space. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logpdf</span><span class="p">(</span><span class="n">coeffs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.logpdf"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess.logpdf">[docs]</a>    <span class="k">def</span> <span class="nf">logpdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coeffs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Logarithm of the probability density function. </span>
+
+<span class="sd">        log(PDF(x)) where x is a field (point in sample space) </span>
+<span class="sd">        specified by KL coeffiecients.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coeffs : ndarray</span>
+<span class="sd">            Array of KL coefficients.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nmodes, nsamples)*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        logpdf : ndarray</span>
+<span class="sd">            Logarithm of the value of the PDF function for the given </span>
+<span class="sd">            point in the sample space.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coeffs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">norm_coeff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">const</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">ncell</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">const</span> <span class="o">+</span> <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">norm_coeff</span><span class="o">**</span><span class="mi">2</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.project_gp_field"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess.project_gp_field">[docs]</a>    <span class="k">def</span> <span class="nf">project_gp_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Project a field onto the KL modes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        field : ndarray</span>
+<span class="sd">            Scalar field. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">        mean : ndarray</span>
+<span class="sd">            Mean vector. *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        coeffs : ndarray</span>
+<span class="sd">            Projection magnitude.</span>
+<span class="sd">            *dtype=float*, *ndim=1*, *shape=(nmodes)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">project_kl</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">klmodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">mean</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.project_func_field"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.GaussianProcess.project_func_field">[docs]</a>    <span class="k">def</span> <span class="nf">project_func_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Project a field from the function of the Gaussian process </span>
+<span class="sd">        onto the KL modes. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        field : ndarray</span>
+<span class="sd">            Scalar field. *dtype=float*, *ndim=1*, *shape=(ncells)*</span>
+<span class="sd">        mean : ndarray</span>
+<span class="sd">            Mean vector. *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        coeffs : ndarray</span>
+<span class="sd">            Projection magnitude.</span>
+<span class="sd">            *dtype=float*, *ndim=1*, *shape=(nmodes)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">funcinv</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">funcinv</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">project_kl</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">klmodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">mean</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="LogNormal"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.LogNormal">[docs]</a><span class="k">class</span> <span class="nc">LogNormal</span><span class="p">(</span><span class="n">GaussianProcess</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Log-normal process class. &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LogNormal.__init__"><a class="viewcode-back" href="../../../dafi_fields.html#dafi.random_field.field.LogNormal.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">klmodes_gp</span><span class="p">,</span> <span class="n">median</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize log-normal process class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        klmodes_gp : ndarray</span>
+<span class="sd">            KL modes (eigenvectors) of the underlying Gaussian process. </span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nmodes)*</span>
+
+<span class="sd">        median : ndarray</span>
+<span class="sd">            Median vector. Default one (1). </span>
+<span class="sd">            *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">        weights : ndarray</span>
+<span class="sd">            Weight (e.g. cell volume) associated with each state.</span>
+<span class="sd">            Default ones (1). *dtype=float*, *ndim=1*, *shape=(nstate)* </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nstate</span> <span class="o">=</span> <span class="n">klmodes_gp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">median</span> <span class="o">=</span> <span class="n">_preprocess_field</span><span class="p">(</span><span class="n">median</span><span class="p">,</span> <span class="n">nstate</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">median_func</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">median</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">median_func</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">funcinv</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">median_func</span><span class="p">)</span>
+
+        <span class="n">mean</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">klmodes_gp</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">funcinv</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2020 Virginia Polytechnic Institute and State University..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

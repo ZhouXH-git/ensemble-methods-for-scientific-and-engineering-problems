@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dafi.random_field &mdash; dafi 1.0.0 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="dafi.random_field.covariance" href="dafi_fields_cov.html" />
+    <link rel="prev" title="dafi.inverse" href="dafi_inverse.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> dafi
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_lorenz.html">Tutorial: Lorenz63</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_diffusion.html">Tutorial: Diffusion</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="source_code.html">Source Code</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dafi_exec.html">dafi (executable)</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="dafi_package.html">dafi (Package)</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dafi_inverse.html">dafi.inverse</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">dafi.random_field</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dafi_fields_cov.html">dafi.random_field.covariance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dafi_fields_foam.html">dafi.random_field.foam</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">dafi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="source_code.html">Source Code</a> &raquo;</li>
+          <li><a href="dafi_package.html">dafi (Package)</a> &raquo;</li>
+      <li>dafi.random_field</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/dafi_fields.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="dafi-random-field">
+<h1>dafi.random_field<a class="headerlink" href="#dafi-random-field" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dafi_fields_cov.html">dafi.random_field.covariance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dafi_fields_foam.html">dafi.random_field.foam</a></li>
+</ul>
+</div>
+<span class="target" id="module-dafi.random_field.field"></span><p>Random fields representation and manipulation.</p>
+<p>These functions can be called directly from <code class="docutils literal notranslate"><span class="pre">dafi.random_field</span></code>, e.g.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dafi</span><span class="o">.</span><span class="n">random_field</span><span class="o">.</span><span class="n">calc_kl_modes</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt id="dafi.random_field.field.GaussianProcess">
+<em class="property">class </em><code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">GaussianProcess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">klmodes</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">funcinv</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gaussian process class.</p>
+<p>Also allows for the creation of a function of a Gaussian process.
+E.g. see <em>‘Lognormal’</em> class.</p>
+<dl class="py method">
+<dt id="dafi.random_field.field.GaussianProcess.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">klmodes</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">funcinv</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize Gaussian process class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>klmodes</strong> (<em>ndarray</em>) – KL modes (eigenvectors).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nmodes)</em></p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. Default zero (0).
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>weights</strong> (<em>ndarray</em>) – Weight (e.g. cell volume) associated with each state.
+Default ones (1). <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>func</strong> (<em>function</em>) – Function to create a random process that is a function of
+a Gaussian process. Default is identity function (GP).</p></li>
+<li><p><strong>funcinv</strong> (<em>function</em>) – Inverse of func.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.random_field.field.GaussianProcess.logpdf">
+<code class="sig-name descname">logpdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coeffs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess.logpdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess.logpdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logarithm of the probability density function.</p>
+<p>log(PDF(x)) where x is a field (point in sample space)
+specified by KL coeffiecients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coeffs</strong> (<em>ndarray</em>) – Array of KL coefficients.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nmodes, nsamples)</em></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>logpdf</strong> – Logarithm of the value of the PDF function for the given
+point in the sample space.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.random_field.field.GaussianProcess.pdf">
+<code class="sig-name descname">pdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coeffs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess.pdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess.pdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Probaility density function (PDF).</p>
+<p>PDF(x) where x is a field (point in sample space) specified by
+KL coeffiecients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coeffs</strong> (<em>ndarray</em>) – Array of KL coefficients.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nmodes, nsamples)</em></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>pdf</strong> – Value of the PDF function for the given point in the sample space.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.random_field.field.GaussianProcess.project_func_field">
+<code class="sig-name descname">project_func_field</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">field</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess.project_func_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess.project_func_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project a field from the function of the Gaussian process
+onto the KL modes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<em>ndarray</em>) – Scalar field. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>coeffs</strong> – Projection magnitude.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nmodes)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.random_field.field.GaussianProcess.project_gp_field">
+<code class="sig-name descname">project_gp_field</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">field</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess.project_gp_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess.project_gp_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project a field onto the KL modes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<em>ndarray</em>) – Scalar field. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>coeffs</strong> – Projection magnitude.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nmodes)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.random_field.field.GaussianProcess.reconstruct_func">
+<code class="sig-name descname">reconstruct_func</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coeffs</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess.reconstruct_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess.reconstruct_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct the function of the Gaussian process field
+from given KL coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coeffs</strong> (<em>ndarray</em>) – Array of KL coefficients.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nmodes, nsamples)</em></p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. If <em>None</em>, self.mean is used.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>fields</strong> – Reconstructed fields.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.random_field.field.GaussianProcess.reconstruct_gp">
+<code class="sig-name descname">reconstruct_gp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coeffs</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess.reconstruct_gp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess.reconstruct_gp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct the Gaussian process field from given
+KL coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coeffs</strong> (<em>ndarray</em>) – Array of KL coefficients.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nmodes, nsamples)</em></p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. If <em>None</em>, self.mean is used.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>fields</strong> – Reconstructed fields.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.random_field.field.GaussianProcess.sample_coeffs">
+<code class="sig-name descname">sample_coeffs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nsamples</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess.sample_coeffs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess.sample_coeffs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create Karhunen-Loève (KL) coefficents for random samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nsamples</strong> (<em>int</em>) – Number of samples for which to generate KL coefficients.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>coeffs</strong> – Matrix of samples KL coefficients for the Gaussian process.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.random_field.field.GaussianProcess.sample_func">
+<code class="sig-name descname">sample_func</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nsamples</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess.sample_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess.sample_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate samples of the function of the Gaussian process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nsamples</strong> (<em>int</em>) – Number of samples to generate.</p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. If <em>None</em>, self.mean is used.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>samples</strong> – Sample fields from the function of the Gaussian process.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.random_field.field.GaussianProcess.sample_gp">
+<code class="sig-name descname">sample_gp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nsamples</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#GaussianProcess.sample_gp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.GaussianProcess.sample_gp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate samples of the Gaussian process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nsamples</strong> (<em>int</em>) – Number of samples to generate.</p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. If <em>None</em>, self.mean is used.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>samples</strong> (<em>ndarray</em>) – Sample fields from Gaussian process.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p></li>
+<li><p><strong>coeffs</strong> (<em>ndarray</em>) – Matrix of samples KL coefficients for the Gaussian process.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dafi.random_field.field.LogNormal">
+<em class="property">class </em><code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">LogNormal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">klmodes_gp</span></em>, <em class="sig-param"><span class="n">median</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#LogNormal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.LogNormal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log-normal process class.</p>
+<dl class="py method">
+<dt id="dafi.random_field.field.LogNormal.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">klmodes_gp</span></em>, <em class="sig-param"><span class="n">median</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#LogNormal.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.LogNormal.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize log-normal process class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>klmodes_gp</strong> (<em>ndarray</em>) – KL modes (eigenvectors) of the underlying Gaussian process.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nmodes)</em></p></li>
+<li><p><strong>median</strong> (<em>ndarray</em>) – Median vector. Default one (1).
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>weights</strong> (<em>ndarray</em>) – Weight (e.g. cell volume) associated with each state.
+Default ones (1). <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.calc_kl_modes">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">calc_kl_modes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cov</span></em>, <em class="sig-param"><span class="n">nmodes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">weight_field</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eps</span><span class="o">=</span><span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">normalize</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#calc_kl_modes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.calc_kl_modes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the first N Karhunen-Loève modes for a covariance
+field.</p>
+<p>Converts the covariance to a sparse matrix if it is not one yet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov</strong> (<em>ndarray</em>) – Covariance matrix. Can be ndarray, matrix, or scipy sparse
+matrix. <em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p></li>
+<li><p><strong>nmodes</strong> (<em>int</em>) – Number of KL modes to obtain.</p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Weight (e.g. cell volume) associated with each state.
+Default ones (1). <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – Small quantity to add to the diagonal of the covariance matrix
+for numerical stability.</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em>) – Whether to normalize (norm = 1) the KL modes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>eig_vals</strong> (<em>ndarray</em>) – Eigenvalue associated with each mode.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nmodes)</em></p></li>
+<li><p><strong>kl_modes</strong> (<em>ndarray</em>) – KL modes (eigenvectors).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nmodes)</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.calc_kl_modes_coverage">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">calc_kl_modes_coverage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cov</span></em>, <em class="sig-param"><span class="n">coverage</span></em>, <em class="sig-param"><span class="n">weight_field</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eps</span><span class="o">=</span><span class="default_value">1e-08</span></em>, <em class="sig-param"><span class="n">max_modes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">normalize</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#calc_kl_modes_coverage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.calc_kl_modes_coverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate all KL modes and return only those required to achieve
+a certain coverage of the variance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov</strong> (<em>ndarray</em>) – Covariance matrix. Can be ndarray, matrix, or scipy sparse
+matrix. <em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p></li>
+<li><p><strong>coverage</strong> (<em>float</em>) – Desired percentage coverage of the variance. Value between 0-1.</p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Weight (e.g. cell volume) associated with each state.
+Default ones (1). <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – Small quantity to add to the diagonal of the covariance matrix
+for numerical stability.</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em>) – Whether to normalize (norm = 1) the KL modes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>eig_vals</strong> (<em>ndarray</em>) – Eigenvalue associated with each mode. For the first N modes such
+that the desired coverage of the variance is achieved.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(N)</em></p></li>
+<li><p><strong>kl_modes</strong> (<em>ndarray</em>) – first N  KL modes (eigenvectors)  such that the desired coverage
+of the variance is achieved.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, N)</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.gp_samples_cholesky">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">gp_samples_cholesky</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cov</span></em>, <em class="sig-param"><span class="n">nsamples</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eps</span><span class="o">=</span><span class="default_value">1e-08</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#gp_samples_cholesky"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.gp_samples_cholesky" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate samples of a Gaussian Process using Cholesky
+decomposition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov</strong> (<em>ndarray</em>) – Covariance matrix. Can be ndarray, matrix, or scipy sparse
+matrix. <em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p></li>
+<li><p><strong>nsamples</strong> (<em>int</em>) – Number of samples to generate.</p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – Small quantity to add to the diagonal of the covariance matrix
+for numerical stability.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>samples</strong> – Matrix of samples.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.gp_samples_kl">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">gp_samples_kl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cov</span></em>, <em class="sig-param"><span class="n">nsamples</span></em>, <em class="sig-param"><span class="n">weight_field</span></em>, <em class="sig-param"><span class="n">nmodes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eps</span><span class="o">=</span><span class="default_value">1e-08</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#gp_samples_kl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.gp_samples_kl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate samples of a Gaussian Process using KL decomposition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov</strong> (<em>ndarray</em>) – Covariance matrix. Can be ndarray, matrix, or scipy sparse
+matrix. <em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p></li>
+<li><p><strong>nsamples</strong> (<em>int</em>) – Number of samples to generate.</p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Weight (e.g. cell volume) associated with each state.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>nmodes</strong> (<em>int</em>) – Number of modes to use when generating samples. <em>‘None’</em> to use
+all modes.</p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – Small quantity to add to the diagonal of the covariance matrix
+for numerical stability.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>samples</strong> – Matrix of samples.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.gp_samples_kl_coverage">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">gp_samples_kl_coverage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cov</span></em>, <em class="sig-param"><span class="n">nsamples</span></em>, <em class="sig-param"><span class="n">weight_field</span></em>, <em class="sig-param"><span class="n">coverage</span><span class="o">=</span><span class="default_value">0.99</span></em>, <em class="sig-param"><span class="n">max_modes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eps</span><span class="o">=</span><span class="default_value">1e-08</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#gp_samples_kl_coverage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.gp_samples_kl_coverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate samples of a Gaussian Process using KL decomposition.</p>
+<p>Only the firs N modes required to get the desired variance coverage
+are used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov</strong> (<em>ndarray</em>) – Covariance matrix. Can be ndarray, matrix, or scipy sparse
+matrix. <em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p></li>
+<li><p><strong>nsamples</strong> (<em>int</em>) – Number of samples to generate.</p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Weight (e.g. cell volume) associated with each state.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>coverage</strong> (<em>float</em>) – Desired percentage coverage of the variance. Value between 0-1.</p></li>
+<li><p><strong>max_modes</strong> (<em>int</em>) – Maximum number of modes used. This is the number of modes that
+is calculated. If less are needed to achieve the desired
+coverage the additional ones are discarded.</p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>eps</strong> (<em>float</em>) – Small quantity to add to the diagonal of the covariance matrix
+for numerical stability.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>samples</strong> (<em>ndarray</em>) – Matrix of samples.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p></li>
+<li><p><strong>nmodes</strong> (<em>int</em>) – Number of modes used to achieve the requested coverage.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.gp_samples_klmodes">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">gp_samples_klmodes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">modes</span></em>, <em class="sig-param"><span class="n">nsamples</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#gp_samples_klmodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.gp_samples_klmodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate samples of a Gaussian Process using the given KL
+modes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>modes</strong> (<em>ndarray</em>) – KL modes. <em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nmodes)</em></p></li>
+<li><p><strong>nsamples</strong> (<em>int</em>) – Number of samples to generate.</p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>samples</strong> – Matrix of samples.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.gp_sqrexp_samples">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">gp_sqrexp_samples</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nsamples</span></em>, <em class="sig-param"><span class="n">coords</span></em>, <em class="sig-param"><span class="n">stddev</span></em>, <em class="sig-param"><span class="n">length_scales</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">weight_field</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_modes</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#gp_sqrexp_samples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.gp_sqrexp_samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate samples from a Gaussian Process with square exponential
+correlation kernel.</p>
+<p>This is a convinience function for new users or simple cases.
+It create the covariance matrix, does the KL decomposition, keeps
+the required modes for 99% coverage, and create the samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nsamples</strong> (<em>int</em>) – Number of samples to generate.</p></li>
+<li><p><strong>coords</strong> (<em>ndarray</em>) – Array of coordinates. Each row correspond to a different point
+and the number of columns is the number of physical dimensions
+(e.g. 3 for (x,y,z)).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(npoints, ndims)</em></p></li>
+<li><p><strong>stddev</strong> (<em>ndarray</em>) – Standard deviation of each state. Alternatively, provide a float
+for a constant standard deviation.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>length_scales</strong> (<em>list</em>) – Length scale for each physical dimensions. List length is ndims.
+Each entry is either a one dimensional ndarray of length nstate
+(length scale field) or a float (constant length scale).</p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Weight (e.g. cell volume) associated with each state.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>max_modes</strong> (<em>int</em>) – Maximum number of modes used. This is the number of modes that
+is calculated. If less are needed to achieve 99% coverage the
+additional ones are discarded.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.inner_product">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">inner_product</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">field_1</span></em>, <em class="sig-param"><span class="n">field_2</span></em>, <em class="sig-param"><span class="n">weight_field</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#inner_product"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.inner_product" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the inner product between two fields.</p>
+<p>The two fields share the same weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field_1</strong> (<em>ndarray</em>) – One scalar field. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>field_2</strong> (<em>ndarray</em>) – Another scalar field.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Cell volumes. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>product</strong> – The inner product between the two fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.integral">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">integral</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">field</span></em>, <em class="sig-param"><span class="n">weight_field</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#integral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the integral of a field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<em>ndarray</em>) – Scalar field. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Cell volumes. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>field_integral</strong> – The integral of the field over the domain.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.interpolate_field_rbf">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">interpolate_field_rbf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">coords</span></em>, <em class="sig-param"><span class="n">kernel</span></em>, <em class="sig-param"><span class="n">length_scale</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#interpolate_field_rbf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.interpolate_field_rbf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate data using a radial basis function (RBF) to create a
+field from sparse specifications.</p>
+<p>This is used for instance to specify a variance field based on
+expert knowledge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em>) – Sparse data to create interpolation from. For an NxM array, the
+number of data points is N, the number of dimensions
+(coordinates) is M-1, and the Mth column is the data value.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(N, M)</em></p></li>
+<li><p><strong>coords</strong> (<em>ndarray</em>) – Coordinates of the cell centers of the full discretized field.
+The RBF will be evaluated at these points.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(ncells, M-1)</em></p></li>
+<li><p><strong>kernel</strong> (<em>str</em>) – Kernel (function) of the RBF. See <em>‘function’</em> input of
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.Rbf.html">scipy.interpolate.Rbf</a> for list of options.</p></li>
+<li><p><strong>length_scale</strong> (<em>float</em>) – Length scale parameter (epsilon in <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.Rbf.html">scipy.interpolate.Rbf</a>)
+in the RBF kernel.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>field</strong> – Full field. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.inverse_distance_weights">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">inverse_distance_weights</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coords</span></em>, <em class="sig-param"><span class="n">connectivity</span></em>, <em class="sig-param"><span class="n">points</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-06</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#inverse_distance_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.inverse_distance_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create linear interpolation matrix (observation operatror H).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.kl_coverage">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">kl_coverage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cov</span></em>, <em class="sig-param"><span class="n">eig_vals</span></em>, <em class="sig-param"><span class="n">weight_field</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#kl_coverage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.kl_coverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the percentage of the covariance covered by the the
+first N KL modes for N from 1-nmodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov</strong> (<em>ndarray</em>) – Covariance matrix. Can be ndarray, matrix, or scipy sparse
+matrix. <em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p></li>
+<li><p><strong>eig_vals</strong> (<em>ndarray</em>) – Eigenvalues associated with each mode.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nmodes)</em></p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Weight (e.g. cell volume) associated with each state.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>coverage</strong> – Cumulative variance coverage of the first N modes. Each value
+is 0-1 and increasing.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nmodes)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.norm">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">norm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">field</span></em>, <em class="sig-param"><span class="n">weight_field</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the L2-norm of a field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<em>ndarray</em>) – Scalar field. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Cell volumes. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>field_norm</strong> – The norm of the field.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.project_kl">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">project_kl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">field</span></em>, <em class="sig-param"><span class="n">modes</span></em>, <em class="sig-param"><span class="n">weight_field</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#project_kl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.project_kl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project a field onto a set of modes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<em>ndarray</em>) – Scalar field. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>modes</strong> (<em>ndarray</em>) – KL modes. <em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nmodes)</em></p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Weight (e.g. cell volume) associated with each state.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>coeffs</strong> – Projection magnitude.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nmodes)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.projection">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">projection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">field_1</span></em>, <em class="sig-param"><span class="n">field_2</span></em>, <em class="sig-param"><span class="n">weight_field</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project field_1 onto field_2.</p>
+<p>The two fields share the same weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field_1</strong> (<em>ndarray</em>) – Scalar field being projected.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>field_2</strong> (<em>ndarray</em>) – Scalar field used for projection direction.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Cell volumes.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>projected_field</strong> – Projected field.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.projection_magnitude">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">projection_magnitude</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">field_1</span></em>, <em class="sig-param"><span class="n">field_2</span></em>, <em class="sig-param"><span class="n">weight_field</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#projection_magnitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.projection_magnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get magnitude of projection of field_1 onto field_2.</p>
+<p>The two fields share the same weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field_1</strong> (<em>ndarray</em>) – Scalar field being projected.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>field_2</strong> (<em>ndarray</em>) – Scalar field used for projection direction.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Cell volumes.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>magnitude</strong> – magnitude of the projected field.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.reconstruct_kl">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">reconstruct_kl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">modes</span></em>, <em class="sig-param"><span class="n">coeffs</span></em>, <em class="sig-param"><span class="n">mean</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#reconstruct_kl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.reconstruct_kl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct a field using KL modes and given coefficients.</p>
+<p>Can create multiple fields by providing two dimensional array of
+coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>modes</strong> (<em>ndarray</em>) – KL modes. <em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nmodes)</em></p></li>
+<li><p><strong>coeffs</strong> (<em>ndarray</em>) – Array of coefficients.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nmodes, nsamples)</em></p></li>
+<li><p><strong>mean</strong> (<em>ndarray</em>) – Mean vector. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nstate)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>fields</strong> – Reconstructed fields.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.scale_kl_modes">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">scale_kl_modes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eig_vals</span></em>, <em class="sig-param"><span class="n">kl_modes_norm</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#scale_kl_modes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.scale_kl_modes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weight the KL modes by the appropriate variance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eig_vals</strong> (<em>ndarray</em>) – Eigenvalue associated with each mode.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nmodes)</em></p></li>
+<li><p><strong>kl_modes_norm</strong> (<em>ndarray</em>) – Normalized (norm = 1) KL modes (eigenvectors).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nmodes)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>kl_modes_weighted</strong> – KL modes with correct magnitude.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nmodes)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.sparse_cholesky">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">sparse_cholesky</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cov</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#sparse_cholesky"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.sparse_cholesky" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the Cholesky decomposition for a sparse (scipy) matrix.</p>
+<p>Adapted from <a class="reference external" href="https://gist.github.com/omitakahiro/c49e5168d04438c5b20c921b928f1f5d">gist.github.com/omitakahiro</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cov</strong> (<em>ndarray</em>) – Covariance matrix. Can be ndarray, matrix, or scipy sparse
+matrix. <em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nstate)</em></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>lower</strong> – Lower triangular Cholesky factor of the covariance matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>scipy.sparse.csc_matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="dafi.random_field.field.unit_field">
+<code class="sig-prename descclassname">dafi.random_field.field.</code><code class="sig-name descname">unit_field</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">field</span></em>, <em class="sig-param"><span class="n">weight_field</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/random_field/field.html#unit_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.random_field.field.unit_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the unit field (norm = 1) in same direction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<em>ndarray</em>) – Scalar field. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+<li><p><strong>weight_field</strong> (<em>ndarray</em>) – Cell volumes. <em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>field_normed</strong> – Normalized (norm = 1) scalar field.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(ncells)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dafi_inverse.html" class="btn btn-neutral float-left" title="dafi.inverse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dafi_fields_cov.html" class="btn btn-neutral float-right" title="dafi.random_field.covariance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2020 Virginia Polytechnic Institute and State University..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

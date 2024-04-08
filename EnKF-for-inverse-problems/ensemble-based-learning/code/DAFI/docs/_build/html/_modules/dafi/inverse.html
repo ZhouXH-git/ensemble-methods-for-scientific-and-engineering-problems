@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dafi.inverse &mdash; dafi 1.0.0 documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> dafi
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial_lorenz.html">Tutorial: Lorenz63</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial_diffusion.html">Tutorial: Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source_code.html">Source Code</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">dafi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>dafi.inverse</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dafi.inverse</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2020 Virginia Polytechnic Institute and State University.</span>
+<span class="sd">&quot;&quot;&quot; Collection of ensemble-based Bayesian inversion techniques. &quot;&quot;&quot;</span>
+
+<span class="c1"># standard library imports</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="c1"># third party imports</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="c1"># template parent class</span>
+<div class="viewcode-block" id="InverseMethod"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.InverseMethod">[docs]</a><span class="k">class</span> <span class="nc">InverseMethod</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Parent class for ensemble-based Bayesian inversion techniques.</span>
+
+<span class="sd">    Use this as a template to write new inversion classes.</span>
+<span class="sd">    To implement a new inverse technique create a child class and</span>
+<span class="sd">    override the ``analysis`` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="InverseMethod.__init__"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.InverseMethod.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Parse input file and assign values to class attributes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inputs_dafi : dict</span>
+<span class="sd">            Dictionary containing all the dafi inputs in case the model</span>
+<span class="sd">            requires access to this information.</span>
+<span class="sd">        inputs : dict</span>
+<span class="sd">            Dictionary containing required inverse method inputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span> <span class="o">=</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span> <span class="o">=</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;save_level&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;debug&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;save_dir&#39;</span><span class="p">],</span> <span class="s1">&#39;debug&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs_dafi</span> <span class="o">=</span> <span class="n">inputs_dafi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inflation_flag</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localization_flag</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">str_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;DAFI inverse method: </span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">str_info</span>
+
+<div class="viewcode-block" id="InverseMethod.analysis"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.InverseMethod.analysis">[docs]</a>    <span class="k">def</span> <span class="nf">analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">state_forecast</span><span class="p">,</span> <span class="n">state_in_obsspace</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span>
+                 <span class="n">obs_error</span><span class="p">,</span> <span class="n">obs_vec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Correct the forecast ensemble states to analysis state.</span>
+
+<span class="sd">        This is the data assimilation step.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        iteration : int</span>
+<span class="sd">            Iteration number at current DA time step.</span>
+<span class="sd">        state_forecast : ndarray</span>
+<span class="sd">            Ensemble of forecast states (:math:`x_f`).</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">        state_in_obsspace : ndarray</span>
+<span class="sd">            Ensemble forecast states mapped to observation space (Hx).</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nobs, nsamples)*.</span>
+<span class="sd">        obs : ndarray</span>
+<span class="sd">            Ensemble of (possibly perturbed) observations.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nobs, nsamples)*</span>
+<span class="sd">        obs_error : ndarray</span>
+<span class="sd">            Observation error (covariance) matrix.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nobs, nobs)*</span>
+<span class="sd">        obs_vec : ndarray</span>
+<span class="sd">            Unperturbed observation vector. This is the actual</span>
+<span class="sd">            observation and is the mean of *obs*.</span>
+<span class="sd">            *dtype=float*, *ndim=1*, *shape=(nobs)*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        state_analysis : ndarray</span>
+<span class="sd">            Ensemble matrix of updated states (:math:`x_a`).</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">state_forecast</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">state_analysis</span> <span class="o">=</span> <span class="n">state_forecast</span> <span class="o">+</span> <span class="n">dx</span>
+        <span class="k">return</span> <span class="n">state_analysis</span></div>
+
+    <span class="k">def</span> <span class="nf">_save_debug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_dict</span><span class="p">,</span> <span class="n">iteration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Save specified ndarrays to the debug directory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">debug_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="n">key</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_debug_dir</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+<span class="c1"># child classes (specific filtering techniques)</span>
+<div class="viewcode-block" id="EnKF"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.EnKF">[docs]</a><span class="k">class</span> <span class="nc">EnKF</span><span class="p">(</span><span class="n">InverseMethod</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Implementation of the ensemble Kalman Filter (EnKF).</span>
+
+<span class="sd">    The EnKF is updated by: :math:`x_a = x_f + K*(obs - Hx)` where</span>
+<span class="sd">    :math:`x_f` is the forecasted state vector (by the forward model),</span>
+<span class="sd">    :math:`x_a` is the updated vector after data-assimilation,</span>
+<span class="sd">    :math:`K` is the Kalman gain matrix, :math:`obs` is the observation</span>
+<span class="sd">    vector, and</span>
+<span class="sd">    :math:`Hx` is the forecasted state vector in observation space.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EnKF.__init__"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.EnKF.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; See  :py:meth:`InverseMethod.__init__` for details. &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Ensemble Kalman Filter (EnKF)&#39;</span></div>
+
+<div class="viewcode-block" id="EnKF.analysis"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.EnKF.analysis">[docs]</a>    <span class="k">def</span> <span class="nf">analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">state_forecast</span><span class="p">,</span> <span class="n">state_in_obsspace</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span>
+                 <span class="n">obs_error</span><span class="p">,</span> <span class="n">obs_vec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Correct the forecast ensemble states using EnKF.</span>
+
+<span class="sd">        See :py:meth:`InverseMethod.analysis` for I/O details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate the Kalman gain matrix</span>
+        <span class="n">xp</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">state_forecast</span><span class="p">)</span>
+        <span class="n">hxp</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">state_in_obsspace</span><span class="p">)</span>
+        <span class="n">coeff</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">))</span>
+        <span class="n">pht</span> <span class="o">=</span> <span class="n">coeff</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">hxp</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">hpht</span> <span class="o">=</span> <span class="n">coeff</span> <span class="o">*</span> <span class="n">hxp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">hxp</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">_check_condition_number</span><span class="p">(</span><span class="n">hpht</span> <span class="o">+</span> <span class="n">obs_error</span><span class="p">,</span> <span class="s1">&#39;(HPHT + R)&#39;</span><span class="p">)</span>
+        <span class="n">inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">hpht</span> <span class="o">+</span> <span class="n">obs_error</span><span class="p">)</span>
+        <span class="n">kalman_gain_matrix</span> <span class="o">=</span> <span class="n">pht</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
+
+        <span class="c1"># analysis step</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">kalman_gain_matrix</span><span class="p">,</span> <span class="n">obs</span> <span class="o">-</span> <span class="n">state_in_obsspace</span><span class="p">)</span>
+        <span class="n">state_analysis</span> <span class="o">=</span> <span class="n">state_forecast</span> <span class="o">+</span> <span class="n">dx</span>
+
+        <span class="c1"># debug</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
+            <span class="n">debug_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;K&#39;</span><span class="p">:</span> <span class="n">kalman_gain_matrix</span><span class="p">,</span> <span class="s1">&#39;inv&#39;</span><span class="p">:</span> <span class="n">inv</span><span class="p">,</span> <span class="s1">&#39;HPHT&#39;</span><span class="p">:</span> <span class="n">hpht</span><span class="p">,</span> <span class="s1">&#39;PHT&#39;</span><span class="p">:</span> <span class="n">pht</span><span class="p">,</span>
+                <span class="s1">&#39;Hxp&#39;</span><span class="p">:</span> <span class="n">hxp</span><span class="p">,</span> <span class="s1">&#39;xp&#39;</span><span class="p">:</span> <span class="n">xp</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_debug</span><span class="p">(</span><span class="n">debug_dict</span><span class="p">,</span> <span class="n">iteration</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_analysis</span></div></div>
+
+
+<div class="viewcode-block" id="EnRML"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.EnRML">[docs]</a><span class="k">class</span> <span class="nc">EnRML</span><span class="p">(</span><span class="n">InverseMethod</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Implementation of the ensemble Randomized Maximal Likelihood</span>
+<span class="sd">    (EnRML).</span>
+
+<span class="sd">    The EnRML is updated by: :math:`x_a = x_f + GN*(obs - Hx)+PN`</span>
+<span class="sd">    where :math:`x_f` is the forecasted state vector</span>
+<span class="sd">    (by the forward model),</span>
+<span class="sd">    :math:`x_a` is the updated vector after data-assimilation,</span>
+<span class="sd">    :math:`GN` is the Gauss-Newton matrix,</span>
+<span class="sd">    :math:`obs` is the observation vector,</span>
+<span class="sd">    :math:`Hx` is the forecasted state vector in observation space, and</span>
+<span class="sd">    :math:`PN` is the penalty matrix.</span>
+
+<span class="sd">    Required inputs in ``inputs`` dictionary:</span>
+
+<span class="sd">    * **step_length** - *float*</span>
+<span class="sd">      EnRML step length parameter. has value between 0 and 1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EnRML.__init__"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.EnRML.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; See :py:meth:`InverseMethod.__init__` for details. &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Ensemble Randomized Maximal Likelihood (EnRML)&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;step_length&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Override user-specified observation perturbation obtion</span>
+        <span class="c1"># check and give warning</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;perturb_obs_option&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;time&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;warning: EnRML: &#39;perturb_obs_option&#39; set to &#39;time&#39;.&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="c1"># override</span>
+        <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;perturb_obs_option&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span></div>
+
+<div class="viewcode-block" id="EnRML.analysis"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.EnRML.analysis">[docs]</a>    <span class="k">def</span> <span class="nf">analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">state_forecast</span><span class="p">,</span> <span class="n">state_in_obsspace</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span>
+                 <span class="n">obs_error</span><span class="p">,</span> <span class="n">obs_vec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Correct the forecast ensemble states using EnRML.</span>
+
+<span class="sd">        See :py:meth:`InverseMethod.analysis` for I/O details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># save the prior state</span>
+        <span class="k">if</span> <span class="n">iteration</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state_prior</span> <span class="o">=</span> <span class="n">state_forecast</span>
+
+        <span class="c1"># calculate the Gauss-Newton matrix</span>
+        <span class="n">xp0</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_prior</span><span class="p">)</span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">xp0</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xp0</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">state_forecast</span>
+        <span class="n">xp</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">hxp</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">state_in_obsspace</span><span class="p">)</span>
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">hxp</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">xp</span><span class="p">))</span>
+        <span class="n">sen_mat</span> <span class="o">=</span> <span class="n">p0</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">gen</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">cyyi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">p0</span><span class="p">),</span> <span class="n">gen</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">cyyi_R</span> <span class="o">=</span> <span class="n">cyyi</span> <span class="o">+</span> <span class="n">obs_error</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">_check_condition_number</span><span class="p">(</span><span class="n">cyyi_R</span><span class="p">,</span> <span class="s1">&#39;(cyyi + R)&#39;</span><span class="p">)</span>
+        <span class="n">inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">cyyi_R</span><span class="p">)</span>
+        <span class="n">gauss_newton_matrix</span> <span class="o">=</span> <span class="n">sen_mat</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
+
+        <span class="c1"># calculate the penalty</span>
+        <span class="n">penalty</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">gauss_newton_matrix</span><span class="p">,</span> <span class="n">gen</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_prior</span><span class="p">))</span>
+
+        <span class="c1"># analysis step</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">obs</span> <span class="o">-</span> <span class="n">state_in_obsspace</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">gauss_newton_matrix</span><span class="p">,</span> <span class="n">diff</span><span class="p">)</span> <span class="o">+</span> <span class="n">penalty</span>
+        <span class="n">state_analysis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_prior</span> <span class="o">+</span> \
+            <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">*</span> <span class="n">dx</span>
+
+        <span class="c1"># debug</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
+            <span class="n">debug_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;GN&#39;</span><span class="p">:</span> <span class="n">gauss_newton_matrix</span><span class="p">,</span> <span class="s1">&#39;pen&#39;</span><span class="p">:</span> <span class="n">penalty</span><span class="p">,</span> <span class="s1">&#39;inv&#39;</span><span class="p">:</span> <span class="n">inv</span><span class="p">,</span>
+                <span class="s1">&#39;cyyi&#39;</span><span class="p">:</span> <span class="n">cyyi</span><span class="p">,</span> <span class="s1">&#39;Hxp&#39;</span><span class="p">:</span> <span class="n">hxp</span><span class="p">,</span> <span class="s1">&#39;xp&#39;</span><span class="p">:</span> <span class="n">xp</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_debug</span><span class="p">(</span><span class="n">debug_dict</span><span class="p">,</span> <span class="n">iteration</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_analysis</span></div></div>
+
+
+<div class="viewcode-block" id="EnKF_MDA"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.EnKF_MDA">[docs]</a><span class="k">class</span> <span class="nc">EnKF_MDA</span><span class="p">(</span><span class="n">InverseMethod</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Implementation of the ensemble Kalman Filter-Multi data</span>
+<span class="sd">    assimilaton (EnKF-MDA).</span>
+
+<span class="sd">    The EnKF-MDA is updated by:</span>
+<span class="sd">    :math:`x_a = x_f + K_{mda}*(obs - Hx - err_{mda})` where</span>
+<span class="sd">    :math:`x_f` is the forecasted state vector (by the dynamic model),</span>
+<span class="sd">    :math:`x_a` is the updated vector after data-assimilation,</span>
+<span class="sd">    :math:`K_{mda}` is the modified Kalman gain matrix,</span>
+<span class="sd">    :math:`obs` is the observation vector,</span>
+<span class="sd">    :math:`Hx` is the forwarded state vector in observation space, and</span>
+<span class="sd">    :math:`err_{mda}` is the inflated error.</span>
+
+<span class="sd">    Required inputs in ``inputs`` dictionary:</span>
+
+<span class="sd">    * **nsteps** - *int*</span>
+<span class="sd">      Number of steps used in the multiple data assimilation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EnKF_MDA.__init__"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.EnKF_MDA.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; See :py:meth:`InverseMethod.__init__` for details. &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Ensemble Kalman Filter-Multi Data Assimilation (EnKF-MDA)&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;nsteps&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Override user-specified convergence</span>
+        <span class="c1"># check and give warning</span>
+        <span class="n">check1</span> <span class="o">=</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;convergence_option&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span>
+        <span class="n">check2</span> <span class="o">=</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;max_iterations&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">check1</span> <span class="ow">and</span> <span class="n">check2</span><span class="p">):</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;User-supplied convergence options ignored.&#39;</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="c1"># override</span>
+        <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;convergence_option&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;max&#39;</span>
+        <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;max_iterations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span></div>
+
+<div class="viewcode-block" id="EnKF_MDA.analysis"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.EnKF_MDA.analysis">[docs]</a>    <span class="k">def</span> <span class="nf">analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">state_forecast</span><span class="p">,</span> <span class="n">state_in_obsspace</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span>
+                 <span class="n">obs_error</span><span class="p">,</span> <span class="n">obs_vec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Correct the forecast ensemble states using EnKF-MDA.</span>
+
+<span class="sd">        See :py:meth:`InverseMethod.analysis` for I/O details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate the Kalman gain matrix</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">state_forecast</span>
+        <span class="n">xp</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">state_forecast</span><span class="p">)</span>
+        <span class="n">hxp</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">state_in_obsspace</span><span class="p">)</span>
+        <span class="n">coeff</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">))</span>
+        <span class="n">pht</span> <span class="o">=</span> <span class="n">coeff</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">hxp</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">hpht</span> <span class="o">=</span> <span class="n">coeff</span> <span class="o">*</span> <span class="n">hxp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">hxp</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">hpht_ar</span> <span class="o">=</span> <span class="n">hpht</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">obs_error</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">_check_condition_number</span><span class="p">(</span><span class="n">hpht_ar</span><span class="p">,</span> <span class="s1">&#39;(HPHT + aR)&#39;</span><span class="p">)</span>
+        <span class="n">inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">hpht_ar</span><span class="p">)</span>
+        <span class="n">kalman_gain_matrix</span> <span class="o">=</span> <span class="n">pht</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
+
+        <span class="c1"># analysis step</span>
+        <span class="n">nsamps</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">obs_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">obs_vec</span><span class="p">,</span> <span class="p">(</span><span class="n">nsamps</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">obs_perturbation</span> <span class="o">=</span> <span class="n">obs</span> <span class="o">-</span> <span class="n">obs_mean</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">obs_mean</span>
+        <span class="n">obs_mda</span> <span class="o">=</span> <span class="n">obs</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">obs_perturbation</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">kalman_gain_matrix</span><span class="p">,</span> <span class="n">obs_mda</span> <span class="o">-</span> <span class="n">state_in_obsspace</span><span class="p">)</span>
+        <span class="n">state_analysis</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">dx</span>
+
+        <span class="c1"># debug</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
+            <span class="n">debug_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;K&#39;</span><span class="p">:</span> <span class="n">kalman_gain_matrix</span><span class="p">,</span> <span class="s1">&#39;inv&#39;</span><span class="p">:</span> <span class="n">inv</span><span class="p">,</span> <span class="s1">&#39;HPHT&#39;</span><span class="p">:</span> <span class="n">hpht</span><span class="p">,</span> <span class="s1">&#39;PHT&#39;</span><span class="p">:</span> <span class="n">pht</span><span class="p">,</span>
+                <span class="s1">&#39;Hxp&#39;</span><span class="p">:</span> <span class="n">hxp</span><span class="p">,</span> <span class="s1">&#39;xp&#39;</span><span class="p">:</span> <span class="n">xp</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_debug</span><span class="p">(</span><span class="n">debug_dict</span><span class="p">,</span> <span class="n">iteration</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_analysis</span></div></div>
+
+
+<div class="viewcode-block" id="REnKF"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.REnKF">[docs]</a><span class="k">class</span> <span class="nc">REnKF</span><span class="p">(</span><span class="n">InverseMethod</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Implementation of the regularized ensemble Kalman Filter</span>
+<span class="sd">    (REnKF).</span>
+
+<span class="sd">    Required inputs in ``inputs`` dictionary:</span>
+
+<span class="sd">    * **penalties_python_file** (*string*) -</span>
+<span class="sd">      Path to python file that contains ``penalties`` (*function*) that</span>
+<span class="sd">      returns a list of dictionaries.</span>
+<span class="sd">      Each dictionary represents one penalty and includes:</span>
+<span class="sd">      ``lambda`` (*float*), ``weight_matrix`` (*ndarray*),</span>
+<span class="sd">      ``penalty`` (*function*), and ``gradient`` (*function*).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="REnKF.__init__"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.REnKF.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; See :py:meth:`InverseMethod.__init__` for details. &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Regularized Ensemble Kalman Filter (REnKF)&#39;</span>
+        <span class="c1"># load penalties</span>
+        <span class="n">pfile</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;penalties_python_file&#39;</span><span class="p">]</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">pfile</span><span class="p">))</span>
+        <span class="n">penalties</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">pfile</span><span class="p">))[</span><span class="mi">0</span><span class="p">]),</span> <span class="s1">&#39;penalties&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">penalties</span> <span class="o">=</span> <span class="n">penalties</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="REnKF.analysis"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.REnKF.analysis">[docs]</a>    <span class="k">def</span> <span class="nf">analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">state_forecast</span><span class="p">,</span> <span class="n">state_in_obsspace</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span>
+                 <span class="n">obs_error</span><span class="p">,</span> <span class="n">obs_vec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Correct the forecast ensemble states using REnKF.</span>
+
+<span class="sd">        See :py:meth:`InverseMethod.analysis` for I/O details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate the Kalman gain matrix</span>
+        <span class="n">xp</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">state_forecast</span><span class="p">)</span>
+        <span class="n">hxp</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">state_in_obsspace</span><span class="p">)</span>
+        <span class="n">coeff</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">))</span>
+        <span class="n">pht</span> <span class="o">=</span> <span class="n">coeff</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">hxp</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">hpht</span> <span class="o">=</span> <span class="n">coeff</span> <span class="o">*</span> <span class="n">hxp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">hxp</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">hpht_R</span> <span class="o">=</span> <span class="n">hpht</span> <span class="o">+</span> <span class="n">obs_error</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">_check_condition_number</span><span class="p">(</span><span class="n">hpht_R</span><span class="p">,</span> <span class="s1">&#39;(HPHT + R)&#39;</span><span class="p">)</span>
+        <span class="n">inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">hpht_R</span><span class="p">)</span>
+        <span class="n">kalman_gain_matrix</span> <span class="o">=</span> <span class="n">pht</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
+
+        <span class="c1"># calculate the &quot;K2&quot; matrix</span>
+        <span class="n">hxx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">hxp</span><span class="p">,</span> <span class="n">xp</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">k2_gain_matrix</span> <span class="o">=</span> \
+            <span class="n">coeff</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">kalman_gain_matrix</span><span class="p">,</span> <span class="n">hxx</span><span class="p">)</span> <span class="o">-</span> <span class="n">coeff</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">xp</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="c1"># calculate penalty matrix</span>
+        <span class="n">penalty_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">state_forecast</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">ipenalty</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">penalties</span><span class="p">:</span>
+            <span class="n">w_mat</span> <span class="o">=</span> <span class="n">ipenalty</span><span class="p">[</span><span class="s1">&#39;weight_matrix&#39;</span><span class="p">]</span>
+            <span class="n">lamb</span> <span class="o">=</span> <span class="n">ipenalty</span><span class="p">[</span><span class="s1">&#39;lambda&#39;</span><span class="p">]</span>
+            <span class="n">lamda</span> <span class="o">=</span> <span class="n">lamb</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">coeff</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">xp</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+            <span class="n">func_penalty</span> <span class="o">=</span> <span class="n">ipenalty</span><span class="p">[</span><span class="s1">&#39;penalty&#39;</span><span class="p">]</span>
+            <span class="n">func_gradient</span> <span class="o">=</span> <span class="n">ipenalty</span><span class="p">[</span><span class="s1">&#39;gradient&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">isamp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">):</span>
+                <span class="n">istate</span> <span class="o">=</span> <span class="n">state_forecast</span><span class="p">[:,</span> <span class="n">isamp</span><span class="p">]</span>
+                <span class="n">gpw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">func_gradient</span><span class="p">(</span><span class="n">istate</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">w_mat</span><span class="p">)</span>
+                <span class="n">gpwg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">gpw</span><span class="p">,</span> <span class="n">func_penalty</span><span class="p">(</span><span class="n">istate</span><span class="p">))</span>
+                <span class="n">penalty_mat</span><span class="p">[:,</span> <span class="n">isamp</span><span class="p">]</span> <span class="o">+=</span> <span class="n">lamda</span> <span class="o">*</span> <span class="n">gpwg</span>
+
+        <span class="c1"># analysis step</span>
+        <span class="n">dx1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">kalman_gain_matrix</span><span class="p">,</span> <span class="n">obs</span> <span class="o">-</span> <span class="n">state_in_obsspace</span><span class="p">)</span>
+        <span class="n">dx2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k2_gain_matrix</span><span class="p">,</span> <span class="n">penalty_mat</span><span class="p">)</span>
+        <span class="n">state_analysis</span> <span class="o">=</span> <span class="n">state_forecast</span> <span class="o">+</span> <span class="n">dx1</span> <span class="o">+</span> <span class="n">dx2</span>
+
+        <span class="c1"># debug</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
+            <span class="c1"># TODO: Save each penalty separately if debug</span>
+            <span class="c1"># debug</span>
+            <span class="n">debug_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;K&#39;</span><span class="p">:</span> <span class="n">kalman_gain_matrix</span><span class="p">,</span> <span class="s1">&#39;inv&#39;</span><span class="p">:</span> <span class="n">inv</span><span class="p">,</span> <span class="s1">&#39;HPHT&#39;</span><span class="p">:</span> <span class="n">hpht</span><span class="p">,</span> <span class="s1">&#39;PHT&#39;</span><span class="p">:</span> <span class="n">pht</span><span class="p">,</span>
+                <span class="s1">&#39;Hxp&#39;</span><span class="p">:</span> <span class="n">hxp</span><span class="p">,</span> <span class="s1">&#39;xp&#39;</span><span class="p">:</span> <span class="n">xp</span><span class="p">,</span> <span class="s1">&#39;lamda&#39;</span><span class="p">:</span> <span class="n">lamda</span><span class="p">,</span>
+                <span class="s1">&#39;dx1&#39;</span><span class="p">:</span> <span class="n">dx1</span><span class="p">,</span> <span class="s1">&#39;dx2&#39;</span><span class="p">:</span> <span class="n">dx2</span><span class="p">,</span> <span class="s1">&#39;k2&#39;</span><span class="p">:</span> <span class="n">k2_gain_matrix</span><span class="p">,</span>
+                <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="n">penalty_mat</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_debug</span><span class="p">(</span><span class="n">debug_dict</span><span class="p">,</span> <span class="n">iteration</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_analysis</span></div></div>
+
+<span class="c1"># child classes (developing)</span>
+<div class="viewcode-block" id="LM_EnRML"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.LM_EnRML">[docs]</a><span class="k">class</span> <span class="nc">LM_EnRML</span><span class="p">(</span><span class="n">InverseMethod</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Implementation of the localized ensemble method (LM_EnRML).</span>
+
+<span class="sd">    :math:`x_f` is the forecasted state vector (by the forward model),</span>
+<span class="sd">    :math:`x_a` is the updated vector after data-assimilation,</span>
+<span class="sd">    :math:`K` is the Kalman gain matrix, :math:`obs` is the observation</span>
+<span class="sd">    vector, and</span>
+<span class="sd">    :math:`Hx` is the forecasted state vector in observation space.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LM_EnRML.__init__"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.LM_EnRML.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; See  :py:meth:`InverseMethod.__init__` for details. &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;LM Ensemble Randomized Maximum Likelihood (LM-EnRML)&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inflation_flag</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;inflation_flag&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localization_flag</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;localization_flag&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;tau&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inputs</span> <span class="ow">or</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;tau&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;tau&#39;</span><span class="p">]</span>
+        <span class="n">nstate</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;nstate&#39;</span><span class="p">]</span>
+        <span class="n">nobs</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;nobs&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">nstate</span><span class="p">,</span> <span class="n">nobs</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="LM_EnRML.analysis"><a class="viewcode-back" href="../../dafi_inverse.html#dafi.inverse.LM_EnRML.analysis">[docs]</a>    <span class="k">def</span> <span class="nf">analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">state_forecast</span><span class="p">,</span> <span class="n">state_in_obsspace</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span>
+                 <span class="n">obs_error</span><span class="p">,</span> <span class="n">obs_vec</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Correct the forecast ensemble states using EnKF.</span>
+
+<span class="sd">        See :py:meth:`InverseMethod.analysis` for I/O details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate the Kalman gain matrix</span>
+        <span class="n">xp</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">state_forecast</span><span class="p">)</span>
+        <span class="n">hxp</span> <span class="o">=</span> <span class="n">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">state_in_obsspace</span><span class="p">)</span>
+        <span class="n">coeff</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">))</span>
+        <span class="n">Sm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">coeff</span><span class="p">)</span> <span class="o">*</span> <span class="n">xp</span>
+        <span class="n">Sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">coeff</span><span class="p">)</span> <span class="o">*</span> <span class="n">hxp</span>
+
+        <span class="n">Sd_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">obs_error</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Sd</span><span class="p">)</span>
+        <span class="n">delta_d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">obs_error</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">obs</span> <span class="o">-</span> <span class="n">state_in_obsspace</span><span class="p">)</span>
+        <span class="n">SmSd</span> <span class="o">=</span> <span class="n">Sm</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Sd_norm</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Sd_norm</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Sd_norm</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">obs_vec</span><span class="p">)))</span>
+        <span class="n">kalman_gain_matrix</span> <span class="o">=</span> <span class="n">SmSd</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
+
+        <span class="c1"># analysis step</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">corr</span> <span class="o">*</span> <span class="n">kalman_gain_matrix</span><span class="p">,</span> <span class="n">delta_d</span><span class="p">)</span>
+        <span class="n">state_analysis</span> <span class="o">=</span> <span class="n">state_forecast</span> <span class="o">+</span> <span class="n">dx</span>
+
+        <span class="c1"># debug</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
+            <span class="n">debug_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="n">coeff</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">xp</span><span class="o">.</span><span class="n">T</span><span class="p">),</span>
+                <span class="s1">&#39;K&#39;</span><span class="p">:</span> <span class="n">kalman_gain_matrix</span><span class="p">,</span> <span class="s1">&#39;inv&#39;</span><span class="p">:</span> <span class="n">inv</span><span class="p">,</span> <span class="s1">&#39;SmSd&#39;</span><span class="p">:</span> <span class="n">SmSd</span><span class="p">,</span>
+                <span class="s1">&#39;Hxp&#39;</span><span class="p">:</span> <span class="n">hxp</span><span class="p">,</span> <span class="s1">&#39;xp&#39;</span><span class="p">:</span> <span class="n">xp</span><span class="p">,</span> <span class="s1">&#39;corr&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">corr</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_debug</span><span class="p">(</span><span class="n">debug_dict</span><span class="p">,</span> <span class="n">iteration</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_analysis</span></div></div>
+
+
+<span class="c1"># functions</span>
+<span class="k">def</span> <span class="nf">_check_condition_number</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;matrix&#39;</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e16</span><span class="p">,):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate the condition number of a matrix and check it is below</span>
+<span class="sd">    the specified threshold.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">conn</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The matrix is singular, inverse will fail.&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+    <span class="n">debug_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;    Condition number of </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">conn</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">debug_message</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">conn</span>
+
+
+<span class="k">def</span> <span class="nf">_mean_subtracted_matrix</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">samp_axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,):</span>
+    <span class="sd">&quot;&quot;&quot; Return the mean subtracted matrix. &quot;&quot;&quot;</span>
+    <span class="n">nsamps</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">samp_axis</span><span class="p">]</span>
+    <span class="n">mean_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">samp_axis</span><span class="p">)])</span>
+    <span class="n">mean_vec</span> <span class="o">=</span> <span class="n">mean_vec</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">mean_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">mean_vec</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nsamps</span><span class="p">))</span>
+    <span class="n">mean_sub_mat</span> <span class="o">=</span> <span class="n">mat</span> <span class="o">-</span> <span class="n">mean_vec</span>
+    <span class="k">return</span> <span class="n">mean_sub_mat</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2020 Virginia Polytechnic Institute and State University..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

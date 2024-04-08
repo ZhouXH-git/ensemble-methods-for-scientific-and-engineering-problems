@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dafi.physics_model &mdash; dafi 1.0.0 documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> dafi
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial_lorenz.html">Tutorial: Lorenz63</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial_diffusion.html">Tutorial: Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source_code.html">Source Code</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">dafi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>dafi.physics_model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dafi.physics_model</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2020 Virginia Polytechnic Institute and State University.</span>
+<span class="sd">&quot;&quot;&quot; Template for physics models. &quot;&quot;&quot;</span>
+
+<span class="c1"># third party imports</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="PhysicsModel"><a class="viewcode-back" href="../../dafi_package.html#dafi.physics_model.PhysicsModel">[docs]</a><span class="k">class</span> <span class="nc">PhysicsModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Parent class for physics models.</span>
+
+<span class="sd">    Accessible through ``dafi.PhysicsModel``.</span>
+<span class="sd">    Use this as a template to write new dynamic models.</span>
+<span class="sd">    The required attributes and methods are summarized below.</span>
+
+<span class="sd">    **Attributes**</span>
+
+<span class="sd">    * **name** - Name of the forward model for reporting. *str*</span>
+<span class="sd">    * **nstate** - Number of states in the state vector. *int*</span>
+<span class="sd">    * **nobs** - Number of observations in the observation vector.</span>
+<span class="sd">      *int*</span>
+<span class="sd">    * **init_state** - Initial mean value of the state vector.</span>
+<span class="sd">      *ndarray*, *dtype=float*, *ndim=1*, *shape=(nstate)*</span>
+
+<span class="sd">    **Methods**</span>
+
+<span class="sd">    See the method&#39;s docstring for information on each.</span>
+
+<span class="sd">    * **generate_ensemble**</span>
+<span class="sd">    * **forecast_to_time**</span>
+<span class="sd">    * **state_to_observation**</span>
+<span class="sd">    * **get_obs**</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PhysicsModel.__init__"><a class="viewcode-back" href="../../dafi_package.html#dafi.physics_model.PhysicsModel.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Parse input file and assign values to class attributes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inputs_dafi : dict</span>
+<span class="sd">            Dictionary containing all the dafi inputs in case the model</span>
+<span class="sd">            requires access to this information.</span>
+<span class="sd">        inputs : dict</span>
+<span class="sd">            Dictionary containing required model inputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Physics Model&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nstate</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nobs</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nstate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nsamples</span> <span class="o">=</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">str_info</span> <span class="o">=</span> <span class="s1">&#39;An empty physics model.&#39;</span>
+        <span class="k">return</span> <span class="n">str_info</span>
+
+<div class="viewcode-block" id="PhysicsModel.generate_ensemble"><a class="viewcode-back" href="../../dafi_package.html#dafi.physics_model.PhysicsModel.generate_ensemble">[docs]</a>    <span class="k">def</span> <span class="nf">generate_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return states at the first data assimilation time-step.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        state : ndarray</span>
+<span class="sd">            Ensemble matrix of states (X0).</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nstate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nsamples</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">state</span></div>
+
+<div class="viewcode-block" id="PhysicsModel.forecast_to_time"><a class="viewcode-back" href="../../dafi_package.html#dafi.physics_model.PhysicsModel.forecast_to_time">[docs]</a>    <span class="k">def</span> <span class="nf">forecast_to_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return states at the next end time.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        state : ndarray</span>
+<span class="sd">            Current ensemble of states (Xa).</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">        time : int</span>
+<span class="sd">            Next end time index. Any concept of real time is implemented</span>
+<span class="sd">            the physics model (e.g. this file).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        state : ndarray</span>
+<span class="sd">            Updated ensemble matrix of states (Xf).</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nstate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nsamples</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">state</span></div>
+
+<div class="viewcode-block" id="PhysicsModel.state_to_observation"><a class="viewcode-back" href="../../dafi_package.html#dafi.physics_model.PhysicsModel.state_to_observation">[docs]</a>    <span class="k">def</span> <span class="nf">state_to_observation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Map the states to observation space (X to HX).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        state : ndarray</span>
+<span class="sd">            Ensemble of states.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nstate, nsamples)*</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        state_obs : ndarray</span>
+<span class="sd">            Ensemble in observation space.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nobs, nsamples)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">state_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nobs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nsamples</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">state_obs</span></div>
+
+<div class="viewcode-block" id="PhysicsModel.get_obs"><a class="viewcode-back" href="../../dafi_package.html#dafi.physics_model.PhysicsModel.get_obs">[docs]</a>    <span class="k">def</span> <span class="nf">get_obs</span><span class="p">(</span><span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the observation and error matrix.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        time : int</span>
+<span class="sd">            Time index at which observation is requested. Any concept of</span>
+<span class="sd">            real time is implemented the physics model (e.g. this file).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        obs : ndarray</span>
+<span class="sd">            Observations.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nobs, nsamples)*</span>
+<span class="sd">        obs_error : ndarray</span>
+<span class="sd">            Observation error (covariance) matrix.</span>
+<span class="sd">            *dtype=float*, *ndim=2*, *shape=(nobs, nobs)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nobs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nsamples</span><span class="p">])</span>
+        <span class="n">obs_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">nobs</span><span class="p">,</span> <span class="n">nobs</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">obs</span><span class="p">,</span> <span class="n">obs_error</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2020 Virginia Polytechnic Institute and State University..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

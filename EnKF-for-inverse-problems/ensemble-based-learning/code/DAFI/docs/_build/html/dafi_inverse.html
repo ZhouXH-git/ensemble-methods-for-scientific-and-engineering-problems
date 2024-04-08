@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dafi.inverse &mdash; dafi 1.0.0 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="dafi.random_field" href="dafi_fields.html" />
+    <link rel="prev" title="dafi (Package)" href="dafi_package.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> dafi
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_lorenz.html">Tutorial: Lorenz63</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_diffusion.html">Tutorial: Diffusion</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="source_code.html">Source Code</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dafi_exec.html">dafi (executable)</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="dafi_package.html">dafi (Package)</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">dafi.inverse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dafi_fields.html">dafi.random_field</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">dafi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="source_code.html">Source Code</a> &raquo;</li>
+          <li><a href="dafi_package.html">dafi (Package)</a> &raquo;</li>
+      <li>dafi.inverse</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/dafi_inverse.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="module-dafi.inverse">
+<span id="dafi-inverse"></span><h1>dafi.inverse<a class="headerlink" href="#module-dafi.inverse" title="Permalink to this headline">¶</a></h1>
+<p>Collection of ensemble-based Bayesian inversion techniques.</p>
+<dl class="py class">
+<dt id="dafi.inverse.EnKF">
+<em class="property">class </em><code class="sig-prename descclassname">dafi.inverse.</code><code class="sig-name descname">EnKF</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#EnKF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.EnKF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the ensemble Kalman Filter (EnKF).</p>
+<p>The EnKF is updated by: <span class="math notranslate nohighlight">\(x_a = x_f + K*(obs - Hx)\)</span> where
+<span class="math notranslate nohighlight">\(x_f\)</span> is the forecasted state vector (by the forward model),
+<span class="math notranslate nohighlight">\(x_a\)</span> is the updated vector after data-assimilation,
+<span class="math notranslate nohighlight">\(K\)</span> is the Kalman gain matrix, <span class="math notranslate nohighlight">\(obs\)</span> is the observation
+vector, and
+<span class="math notranslate nohighlight">\(Hx\)</span> is the forecasted state vector in observation space.</p>
+<dl class="py method">
+<dt id="dafi.inverse.EnKF.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#EnKF.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.EnKF.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>See  <a class="reference internal" href="#dafi.inverse.InverseMethod.__init__" title="dafi.inverse.InverseMethod.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InverseMethod.__init__()</span></code></a> for details.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.inverse.EnKF.analysis">
+<code class="sig-name descname">analysis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em>, <em class="sig-param"><span class="n">state_forecast</span></em>, <em class="sig-param"><span class="n">state_in_obsspace</span></em>, <em class="sig-param"><span class="n">obs</span></em>, <em class="sig-param"><span class="n">obs_error</span></em>, <em class="sig-param"><span class="n">obs_vec</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#EnKF.analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.EnKF.analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Correct the forecast ensemble states using EnKF.</p>
+<p>See <a class="reference internal" href="#dafi.inverse.InverseMethod.analysis" title="dafi.inverse.InverseMethod.analysis"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InverseMethod.analysis()</span></code></a> for I/O details.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dafi.inverse.EnKF_MDA">
+<em class="property">class </em><code class="sig-prename descclassname">dafi.inverse.</code><code class="sig-name descname">EnKF_MDA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#EnKF_MDA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.EnKF_MDA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the ensemble Kalman Filter-Multi data
+assimilaton (EnKF-MDA).</p>
+<p>The EnKF-MDA is updated by:
+<span class="math notranslate nohighlight">\(x_a = x_f + K_{mda}*(obs - Hx - err_{mda})\)</span> where
+<span class="math notranslate nohighlight">\(x_f\)</span> is the forecasted state vector (by the dynamic model),
+<span class="math notranslate nohighlight">\(x_a\)</span> is the updated vector after data-assimilation,
+<span class="math notranslate nohighlight">\(K_{mda}\)</span> is the modified Kalman gain matrix,
+<span class="math notranslate nohighlight">\(obs\)</span> is the observation vector,
+<span class="math notranslate nohighlight">\(Hx\)</span> is the forwarded state vector in observation space, and
+<span class="math notranslate nohighlight">\(err_{mda}\)</span> is the inflated error.</p>
+<p>Required inputs in <code class="docutils literal notranslate"><span class="pre">inputs</span></code> dictionary:</p>
+<ul class="simple">
+<li><p><strong>nsteps</strong> - <em>int</em>
+Number of steps used in the multiple data assimilation.</p></li>
+</ul>
+<dl class="py method">
+<dt id="dafi.inverse.EnKF_MDA.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#EnKF_MDA.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.EnKF_MDA.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#dafi.inverse.InverseMethod.__init__" title="dafi.inverse.InverseMethod.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InverseMethod.__init__()</span></code></a> for details.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.inverse.EnKF_MDA.analysis">
+<code class="sig-name descname">analysis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em>, <em class="sig-param"><span class="n">state_forecast</span></em>, <em class="sig-param"><span class="n">state_in_obsspace</span></em>, <em class="sig-param"><span class="n">obs</span></em>, <em class="sig-param"><span class="n">obs_error</span></em>, <em class="sig-param"><span class="n">obs_vec</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#EnKF_MDA.analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.EnKF_MDA.analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Correct the forecast ensemble states using EnKF-MDA.</p>
+<p>See <a class="reference internal" href="#dafi.inverse.InverseMethod.analysis" title="dafi.inverse.InverseMethod.analysis"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InverseMethod.analysis()</span></code></a> for I/O details.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dafi.inverse.EnRML">
+<em class="property">class </em><code class="sig-prename descclassname">dafi.inverse.</code><code class="sig-name descname">EnRML</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#EnRML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.EnRML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the ensemble Randomized Maximal Likelihood
+(EnRML).</p>
+<p>The EnRML is updated by: <span class="math notranslate nohighlight">\(x_a = x_f + GN*(obs - Hx)+PN\)</span>
+where <span class="math notranslate nohighlight">\(x_f\)</span> is the forecasted state vector
+(by the forward model),
+<span class="math notranslate nohighlight">\(x_a\)</span> is the updated vector after data-assimilation,
+<span class="math notranslate nohighlight">\(GN\)</span> is the Gauss-Newton matrix,
+<span class="math notranslate nohighlight">\(obs\)</span> is the observation vector,
+<span class="math notranslate nohighlight">\(Hx\)</span> is the forecasted state vector in observation space, and
+<span class="math notranslate nohighlight">\(PN\)</span> is the penalty matrix.</p>
+<p>Required inputs in <code class="docutils literal notranslate"><span class="pre">inputs</span></code> dictionary:</p>
+<ul class="simple">
+<li><p><strong>step_length</strong> - <em>float</em>
+EnRML step length parameter. has value between 0 and 1.</p></li>
+</ul>
+<dl class="py method">
+<dt id="dafi.inverse.EnRML.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#EnRML.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.EnRML.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#dafi.inverse.InverseMethod.__init__" title="dafi.inverse.InverseMethod.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InverseMethod.__init__()</span></code></a> for details.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.inverse.EnRML.analysis">
+<code class="sig-name descname">analysis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em>, <em class="sig-param"><span class="n">state_forecast</span></em>, <em class="sig-param"><span class="n">state_in_obsspace</span></em>, <em class="sig-param"><span class="n">obs</span></em>, <em class="sig-param"><span class="n">obs_error</span></em>, <em class="sig-param"><span class="n">obs_vec</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#EnRML.analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.EnRML.analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Correct the forecast ensemble states using EnRML.</p>
+<p>See <a class="reference internal" href="#dafi.inverse.InverseMethod.analysis" title="dafi.inverse.InverseMethod.analysis"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InverseMethod.analysis()</span></code></a> for I/O details.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dafi.inverse.InverseMethod">
+<em class="property">class </em><code class="sig-prename descclassname">dafi.inverse.</code><code class="sig-name descname">InverseMethod</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#InverseMethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.InverseMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parent class for ensemble-based Bayesian inversion techniques.</p>
+<p>Use this as a template to write new inversion classes.
+To implement a new inverse technique create a child class and
+override the <code class="docutils literal notranslate"><span class="pre">analysis</span></code> method.</p>
+<dl class="py method">
+<dt id="dafi.inverse.InverseMethod.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#InverseMethod.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.InverseMethod.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse input file and assign values to class attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs_dafi</strong> (<em>dict</em>) – Dictionary containing all the dafi inputs in case the model
+requires access to this information.</p></li>
+<li><p><strong>inputs</strong> (<em>dict</em>) – Dictionary containing required inverse method inputs.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.inverse.InverseMethod.analysis">
+<code class="sig-name descname">analysis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em>, <em class="sig-param"><span class="n">state_forecast</span></em>, <em class="sig-param"><span class="n">state_in_obsspace</span></em>, <em class="sig-param"><span class="n">obs</span></em>, <em class="sig-param"><span class="n">obs_error</span></em>, <em class="sig-param"><span class="n">obs_vec</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#InverseMethod.analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.InverseMethod.analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Correct the forecast ensemble states to analysis state.</p>
+<p>This is the data assimilation step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iteration</strong> (<em>int</em>) – Iteration number at current DA time step.</p></li>
+<li><p><strong>state_forecast</strong> (<em>ndarray</em>) – Ensemble of forecast states (<span class="math notranslate nohighlight">\(x_f\)</span>).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p></li>
+<li><p><strong>state_in_obsspace</strong> (<em>ndarray</em>) – Ensemble forecast states mapped to observation space (Hx).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nobs, nsamples)</em>.</p></li>
+<li><p><strong>obs</strong> (<em>ndarray</em>) – Ensemble of (possibly perturbed) observations.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nobs, nsamples)</em></p></li>
+<li><p><strong>obs_error</strong> (<em>ndarray</em>) – Observation error (covariance) matrix.
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nobs, nobs)</em></p></li>
+<li><p><strong>obs_vec</strong> (<em>ndarray</em>) – Unperturbed observation vector. This is the actual
+observation and is the mean of <em>obs</em>.
+<em>dtype=float</em>, <em>ndim=1</em>, <em>shape=(nobs)</em></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>state_analysis</strong> – Ensemble matrix of updated states (<span class="math notranslate nohighlight">\(x_a\)</span>).
+<em>dtype=float</em>, <em>ndim=2</em>, <em>shape=(nstate, nsamples)</em></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dafi.inverse.LM_EnRML">
+<em class="property">class </em><code class="sig-prename descclassname">dafi.inverse.</code><code class="sig-name descname">LM_EnRML</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#LM_EnRML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.LM_EnRML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the localized ensemble method (LM_EnRML).</p>
+<p><span class="math notranslate nohighlight">\(x_f\)</span> is the forecasted state vector (by the forward model),
+<span class="math notranslate nohighlight">\(x_a\)</span> is the updated vector after data-assimilation,
+<span class="math notranslate nohighlight">\(K\)</span> is the Kalman gain matrix, <span class="math notranslate nohighlight">\(obs\)</span> is the observation
+vector, and
+<span class="math notranslate nohighlight">\(Hx\)</span> is the forecasted state vector in observation space.</p>
+<dl class="py method">
+<dt id="dafi.inverse.LM_EnRML.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#LM_EnRML.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.LM_EnRML.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>See  <a class="reference internal" href="#dafi.inverse.InverseMethod.__init__" title="dafi.inverse.InverseMethod.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InverseMethod.__init__()</span></code></a> for details.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.inverse.LM_EnRML.analysis">
+<code class="sig-name descname">analysis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em>, <em class="sig-param"><span class="n">state_forecast</span></em>, <em class="sig-param"><span class="n">state_in_obsspace</span></em>, <em class="sig-param"><span class="n">obs</span></em>, <em class="sig-param"><span class="n">obs_error</span></em>, <em class="sig-param"><span class="n">obs_vec</span></em>, <em class="sig-param"><span class="n">corr</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#LM_EnRML.analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.LM_EnRML.analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Correct the forecast ensemble states using EnKF.</p>
+<p>See <a class="reference internal" href="#dafi.inverse.InverseMethod.analysis" title="dafi.inverse.InverseMethod.analysis"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InverseMethod.analysis()</span></code></a> for I/O details.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="dafi.inverse.REnKF">
+<em class="property">class </em><code class="sig-prename descclassname">dafi.inverse.</code><code class="sig-name descname">REnKF</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#REnKF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.REnKF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the regularized ensemble Kalman Filter
+(REnKF).</p>
+<p>Required inputs in <code class="docutils literal notranslate"><span class="pre">inputs</span></code> dictionary:</p>
+<ul class="simple">
+<li><p><strong>penalties_python_file</strong> (<em>string</em>) -
+Path to python file that contains <code class="docutils literal notranslate"><span class="pre">penalties</span></code> (<em>function</em>) that
+returns a list of dictionaries.
+Each dictionary represents one penalty and includes:
+<code class="docutils literal notranslate"><span class="pre">lambda</span></code> (<em>float</em>), <code class="docutils literal notranslate"><span class="pre">weight_matrix</span></code> (<em>ndarray</em>),
+<code class="docutils literal notranslate"><span class="pre">penalty</span></code> (<em>function</em>), and <code class="docutils literal notranslate"><span class="pre">gradient</span></code> (<em>function</em>).</p></li>
+</ul>
+<dl class="py method">
+<dt id="dafi.inverse.REnKF.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs_dafi</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#REnKF.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.REnKF.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#dafi.inverse.InverseMethod.__init__" title="dafi.inverse.InverseMethod.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InverseMethod.__init__()</span></code></a> for details.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dafi.inverse.REnKF.analysis">
+<code class="sig-name descname">analysis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iteration</span></em>, <em class="sig-param"><span class="n">state_forecast</span></em>, <em class="sig-param"><span class="n">state_in_obsspace</span></em>, <em class="sig-param"><span class="n">obs</span></em>, <em class="sig-param"><span class="n">obs_error</span></em>, <em class="sig-param"><span class="n">obs_vec</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dafi/inverse.html#REnKF.analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dafi.inverse.REnKF.analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Correct the forecast ensemble states using REnKF.</p>
+<p>See <a class="reference internal" href="#dafi.inverse.InverseMethod.analysis" title="dafi.inverse.InverseMethod.analysis"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InverseMethod.analysis()</span></code></a> for I/O details.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dafi_package.html" class="btn btn-neutral float-left" title="dafi (Package)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dafi_fields.html" class="btn btn-neutral float-right" title="dafi.random_field" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2020 Virginia Polytechnic Institute and State University..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

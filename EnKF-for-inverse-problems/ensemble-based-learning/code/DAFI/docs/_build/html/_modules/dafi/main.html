@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dafi.main &mdash; dafi 1.0.0 documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> dafi
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial_lorenz.html">Tutorial: Lorenz63</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial_diffusion.html">Tutorial: Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source_code.html">Source Code</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">dafi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>dafi.main</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dafi.main</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2020 Virginia Polytechnic Institute and State University.</span>
+<span class="sd">&quot;&quot;&quot; DAFI: a Python package for data assimilaton and field inversion.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># standard library imports</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span> <span class="k">as</span> <span class="nn">tm</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="c1"># third party imports</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># local imports</span>
+<span class="c1"># user-specified physics model imported later with importlib</span>
+<span class="c1"># user-specified inverse method imported later with importlib</span>
+
+
+<div class="viewcode-block" id="run"><a class="viewcode-back" href="../../dafi_package.html#dafi.main.run">[docs]</a><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">model_file</span><span class="p">,</span> <span class="n">inverse_method</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">,</span> <span class="n">ntime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">perturb_obs_option</span><span class="o">=</span><span class="s1">&#39;iter&#39;</span><span class="p">,</span> <span class="n">obs_err_multiplier</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">analysis_to_obs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">convergence_option</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="n">max_iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">convergence_residual</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convergence_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">save_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;results_dafi&#39;</span><span class="p">,</span> <span class="n">rand_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">inputs_inverse</span><span class="o">=</span><span class="p">{},</span> <span class="n">inputs_model</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="sd">&quot;&quot;&quot; Run DAFI.</span>
+
+<span class="sd">    Accesible through ``dafi.run()``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model_file: str</span>
+<span class="sd">        Name (path) of dynamic model module/package.</span>
+<span class="sd">    inverse_method: str</span>
+<span class="sd">        Name of inverse method from dafi.inverse_methods module.</span>
+<span class="sd">    nsamples : int</span>
+<span class="sd">        Number of samples in ensemble.</span>
+<span class="sd">    ntime : int</span>
+<span class="sd">        Number of data assimilation times. For stationary use *&#39;1&#39;* or</span>
+<span class="sd">        *&#39;None&#39;*. Default *&#39;None&#39;*.</span>
+<span class="sd">    perturb_obs_option: str</span>
+<span class="sd">      Option on when to perturb observations:</span>
+<span class="sd">      *&#39;iter&#39;* to perturb at each iteration (inner loop),</span>
+<span class="sd">      *&#39;time&#39;* to perturb only once each data assimilaton time</span>
+<span class="sd">      (outer loop),</span>
+<span class="sd">      *&#39;None&#39;* to not perturb observations. Default *&#39;iter&#39;*.</span>
+<span class="sd">    obs_err_multiplier: float</span>
+<span class="sd">      Factor by which to multiply the observation error matrix.</span>
+<span class="sd">      This is done by some authors in the literature. Default *&#39;1.0&#39;*.</span>
+<span class="sd">    analysis_to_obs: bool</span>
+<span class="sd">      Map analysis state to observation space. Default *&#39;False&#39;*.</span>
+<span class="sd">    convergence_option: str</span>
+<span class="sd">      Convergence criteria to use: *&#39;discrepancy&#39;* to use the</span>
+<span class="sd">      discrepancy principle,  *&#39;residual&#39;* to use the iterative</span>
+<span class="sd">      residual, *&#39;max&#39;* to reach the maximum iterations. Default *&#39;max&#39;*.</span>
+<span class="sd">    max_iterations: int</span>
+<span class="sd">      Maximum number of iterations at a given time-step. Default *&#39;1&#39;*.</span>
+<span class="sd">    convergence_residual: float</span>
+<span class="sd">      Residual value for convergence if *reach_max* is *&#39;False&#39;* and</span>
+<span class="sd">      *convergence_option* is *&#39;residual&#39;*. Default *&#39;None&#39;*.</span>
+<span class="sd">    convergence_factor: float</span>
+<span class="sd">      Factor used in the discrepancy principle convergence option.</span>
+<span class="sd">      Default *&#39;1.0&#39;*.</span>
+<span class="sd">    save_level : str</span>
+<span class="sd">        Level of results to save: *&#39;None&#39;* to not save results,</span>
+<span class="sd">        *&#39;time&#39;* to save results at each data assimilation time step,</span>
+<span class="sd">        *&#39;iter&#39;* to save results at each iteration,</span>
+<span class="sd">        *&#39;debug&#39;* to save additional intermediate quantities.</span>
+<span class="sd">        Default *&#39;None&#39;*.</span>
+<span class="sd">    save_dir: str</span>
+<span class="sd">      Folder where to save results. Default *&#39;./results_dafi&#39;*.</span>
+<span class="sd">    rand_seed : float</span>
+<span class="sd">        Seed for numpy.random. If None random seed not set.</span>
+<span class="sd">        Default *&#39;None&#39;*.</span>
+<span class="sd">    verbosity: int</span>
+<span class="sd">        Logging verbosity level, between -1 and 9 (currently -1-3 used).</span>
+<span class="sd">        For no logging use *&#39;-1&#39;*. For debug-level logging use</span>
+<span class="sd">        *&#39;debug&#39;*. Default *&#39;0&#39;*.</span>
+<span class="sd">    inputs_inverse : dict</span>
+<span class="sd">        Inverse method specific inputs.</span>
+<span class="sd">        Default empty dictionary *&#39;{}&#39;*.</span>
+<span class="sd">    inputs_model : dict</span>
+<span class="sd">        Physics model specific inputs.</span>
+<span class="sd">        Default empty dictionary *&#39;{}&#39;*.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    state_analysis_list : list</span>
+<span class="sd">        List of analysis states at each DA time. Length is number of</span>
+<span class="sd">        DA time steps. Each entry is an nd.array containing the ensemble</span>
+<span class="sd">        analysis states (:math:`x_a`) at that time step.</span>
+<span class="sd">        If only one DA time (e.g. stationary, inversion problem) is the</span>
+<span class="sd">        single ndarray. Each entry is: *dtype=float*, *ndim=2*,</span>
+<span class="sd">        *shape=(nstate, nsamples)*.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># collect inputs</span>
+    <span class="c1"># the inverse method and physics model are allowed to modify these</span>
+    <span class="n">inputs_dafi</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;model_file&#39;</span><span class="p">:</span> <span class="n">model_file</span><span class="p">,</span>
+        <span class="s1">&#39;inverse_method&#39;</span><span class="p">:</span> <span class="n">inverse_method</span><span class="p">,</span>
+        <span class="s1">&#39;nsamples&#39;</span><span class="p">:</span> <span class="n">nsamples</span><span class="p">,</span>
+        <span class="s1">&#39;ntime&#39;</span><span class="p">:</span> <span class="n">ntime</span><span class="p">,</span>
+        <span class="s1">&#39;perturb_obs_option&#39;</span><span class="p">:</span> <span class="n">perturb_obs_option</span><span class="p">,</span>
+        <span class="s1">&#39;obs_err_multiplier&#39;</span><span class="p">:</span> <span class="n">obs_err_multiplier</span><span class="p">,</span>
+        <span class="s1">&#39;analysis_to_obs&#39;</span><span class="p">:</span> <span class="n">analysis_to_obs</span><span class="p">,</span>
+        <span class="s1">&#39;convergence_option&#39;</span><span class="p">:</span> <span class="n">convergence_option</span><span class="p">,</span>
+        <span class="s1">&#39;max_iterations&#39;</span><span class="p">:</span> <span class="n">max_iterations</span><span class="p">,</span>
+        <span class="s1">&#39;convergence_residual&#39;</span><span class="p">:</span> <span class="n">convergence_residual</span><span class="p">,</span>
+        <span class="s1">&#39;convergence_factor&#39;</span><span class="p">:</span> <span class="n">convergence_factor</span><span class="p">,</span>
+        <span class="s1">&#39;save_level&#39;</span><span class="p">:</span> <span class="n">save_level</span><span class="p">,</span>
+        <span class="s1">&#39;save_dir&#39;</span><span class="p">:</span> <span class="n">save_dir</span><span class="p">,</span>
+        <span class="s1">&#39;rand_seed&#39;</span><span class="p">:</span> <span class="n">rand_seed</span><span class="p">,</span>
+        <span class="s1">&#39;verbosity&#39;</span><span class="p">:</span> <span class="n">verbosity</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># configure logger</span>
+    <span class="k">if</span> <span class="n">verbosity</span> <span class="o">==</span> <span class="s1">&#39;debug&#39;</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">_log_level</span><span class="p">(</span><span class="n">verbosity</span><span class="p">))</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="c1"># random seed</span>
+    <span class="c1"># this is done before importing local modules that use np.random</span>
+    <span class="k">if</span> <span class="n">rand_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">rand_seed</span><span class="p">)</span>
+
+    <span class="c1"># stationary problem</span>
+    <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;ntime&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;ntime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># create save directory</span>
+    <span class="k">if</span> <span class="n">save_level</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_create_dir</span><span class="p">(</span><span class="n">save_dir</span><span class="p">)</span>
+
+    <span class="c1"># initialize physics model</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">model_file</span><span class="p">)))</span>
+    <span class="n">model_module</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">model_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">Model</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+        <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">model_module</span><span class="p">),</span> <span class="s1">&#39;Model&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs_model</span><span class="p">)</span>
+
+    <span class="c1"># initialize inverse method</span>
+    <span class="n">Inverse</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+        <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;dafi.inverse&#39;</span><span class="p">),</span> <span class="n">inverse_method</span><span class="p">)</span>
+    <span class="n">inverse</span> <span class="o">=</span> <span class="n">Inverse</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inputs_inverse</span><span class="p">)</span>
+
+    <span class="c1"># log</span>
+    <span class="n">log_message</span> <span class="o">=</span> <span class="s2">&quot;Solving the inverse problem&quot;</span> <span class="o">+</span> \
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Physics Model:  </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> \
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Inverse Method: </span><span class="si">{</span><span class="n">inverse</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_log_level</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">log_message</span><span class="p">)</span>
+
+    <span class="c1"># solve</span>
+    <span class="n">state_analysis_list</span> <span class="o">=</span> <span class="n">_solve</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inverse</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+    <span class="c1"># log</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_log_level</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;Done.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;ntime&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">state_analysis_list</span> <span class="o">=</span> <span class="n">state_analysis_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">state_analysis_list</span></div>
+
+
+<span class="k">def</span> <span class="nf">_solve</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">,</span> <span class="n">inverse</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Solve the inverse problem.</span>
+
+<span class="sd">    Implements the general inverse problem consisting of an outer (time)</span>
+<span class="sd">    loop and inner (iteration) loop.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;._solve&#39;</span><span class="p">)</span>
+    <span class="c1"># time and iteration arrays</span>
+    <span class="n">time_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;ntime&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">iteration_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;max_iterations&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="c1"># initial ensemble</span>
+    <span class="n">state_forecast</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate_ensemble</span><span class="p">()</span>
+
+    <span class="c1"># outer loop - time marching</span>
+    <span class="n">state_analysis_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">time_array</span><span class="p">:</span>
+        <span class="n">log_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Data assimilation step: </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_log_level</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">log_message</span><span class="p">)</span>
+
+        <span class="c1"># dynamic model - propagate the state ensemble to current DA time.</span>
+        <span class="k">if</span> <span class="n">time</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">state_forecast</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">forecast_to_time</span><span class="p">(</span><span class="n">state_analysis</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+
+        <span class="c1"># get observations at current DA time</span>
+        <span class="n">obs_vec</span><span class="p">,</span> <span class="n">obs_error</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_obs</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">obs_error</span> <span class="o">*=</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;obs_err_multiplier&#39;</span><span class="p">]</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">obs_vec</span><span class="p">,</span> <span class="p">(</span><span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;perturb_obs_option&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span>
+            <span class="n">obs</span><span class="p">,</span> <span class="n">obs_perturbation</span> <span class="o">=</span> <span class="n">_perturb_vec</span><span class="p">(</span>
+                <span class="n">obs_vec</span><span class="p">,</span> <span class="n">obs_error</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">])</span>
+
+        <span class="c1"># prior state for iterative methods that require it</span>
+        <span class="n">state_prior</span> <span class="o">=</span> <span class="n">state_forecast</span>
+
+        <span class="c1"># inner loop - iterative analysis at fixed DA time.</span>
+        <span class="n">misfit_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">noise_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">residual_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;save_dir&#39;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;t_</span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">early_stop</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="n">iteration_array</span><span class="p">:</span>
+            <span class="c1"># log</span>
+            <span class="n">log_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  Iteration: </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_log_level</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">log_message</span><span class="p">)</span>
+
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="c1"># map the state vector to observation space</span>
+            <span class="k">if</span> <span class="n">iteration</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">state_forecast</span> <span class="o">=</span> <span class="n">state_analysis</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">state_in_obsspace</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">state_to_observation</span><span class="p">(</span><span class="n">state_forecast</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;      Ensemble of forecast ... </span><span class="si">{</span><span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">ts</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">s&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">iteration</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">state_in_obsspace_prior</span> <span class="o">=</span> <span class="n">state_in_obsspace</span>
+
+            <span class="c1"># perturb observations</span>
+            <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;perturb_obs_option&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;iter&#39;</span><span class="p">:</span>
+                <span class="n">obs</span><span class="p">,</span> <span class="n">obs_perturbation</span> <span class="o">=</span> <span class="n">_perturb_vec</span><span class="p">(</span>
+                    <span class="n">obs_vec</span><span class="p">,</span> <span class="n">obs_error</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">])</span>
+
+            <span class="c1"># data assimilaton</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="c1"># inflation</span>
+            <span class="k">if</span> <span class="n">iteration</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">inverse</span><span class="o">.</span><span class="n">inflation_flag</span><span class="p">:</span>
+                <span class="n">coeff</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">Sd</span> <span class="o">=</span> <span class="n">coeff</span> <span class="o">*</span> <span class="p">(</span><span class="n">state_in_obsspace</span> <span class="o">-</span> <span class="n">state_in_obsspace</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+                <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">Sd</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Sd</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span> <span class="o">/</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">]</span>
+                <span class="n">inverse</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">Sd</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Sd</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span> <span class="o">/</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">iteration</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">inverse</span><span class="o">.</span><span class="n">inflation_flag</span><span class="p">:</span>
+                <span class="n">inverse</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">inverse</span><span class="o">.</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">inverse</span><span class="o">.</span><span class="n">beta</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inverse</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="mi">1</span>
+            
+            <span class="c1"># correlation-based localization</span>
+            <span class="k">if</span> <span class="n">iteration</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">inverse</span><span class="o">.</span><span class="n">localization_flag</span><span class="p">:</span>
+                <span class="n">Dx</span> <span class="o">=</span> <span class="n">state_prior</span> <span class="o">-</span> <span class="n">state_prior</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">hx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">obs_error</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">state_in_obsspace_prior</span><span class="p">)</span>
+                <span class="n">Dhx</span> <span class="o">=</span> <span class="n">hx</span> <span class="o">-</span> <span class="n">hx</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">cov</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="n">Dx</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Dhx</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">cov</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="n">corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">state_prior</span><span class="p">,</span> <span class="n">hx</span><span class="p">)</span>
+                <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cov</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cov</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                        <span class="n">tau</span> <span class="o">=</span> <span class="n">inverse</span><span class="o">.</span><span class="n">tau</span>
+                        <span class="n">theta</span> <span class="o">=</span> <span class="n">tau</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">corr</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">theta</span><span class="p">:</span>
+                            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">inverse</span><span class="o">.</span><span class="n">corr</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;      number of zero value ... </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s1">&#39;corr.txt&#39;</span><span class="p">,</span> <span class="n">inverse</span><span class="o">.</span><span class="n">corr</span><span class="p">)</span>
+
+            <span class="n">state_analysis</span> <span class="o">=</span> <span class="n">inverse</span><span class="o">.</span><span class="n">analysis</span><span class="p">(</span>
+                <span class="n">iteration</span><span class="p">,</span> <span class="n">state_forecast</span><span class="p">,</span> <span class="n">state_in_obsspace</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">obs_error</span><span class="p">,</span>
+                <span class="n">obs_vec</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;      Data assimilation analysis ... </span><span class="si">{</span><span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">ts</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">s&#39;</span><span class="p">)</span>
+
+            <span class="c1"># save results</span>
+            <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;save_level&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;iter&#39;</span><span class="p">,</span> <span class="s1">&#39;debug&#39;</span><span class="p">}:</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">obs</span><span class="p">,</span>
+                           <span class="s1">&#39;Hx&#39;</span><span class="p">:</span> <span class="n">state_in_obsspace</span><span class="p">,</span>
+                           <span class="s1">&#39;xa&#39;</span><span class="p">:</span> <span class="n">state_analysis</span><span class="p">,</span>
+                           <span class="s1">&#39;xf&#39;</span><span class="p">:</span> <span class="n">state_forecast</span><span class="p">,</span>
+                           <span class="p">}</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="nb">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tdir</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                    <span class="n">_create_dir</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+                    <span class="n">file</span> <span class="o">=</span> <span class="n">key</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;_</span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span>
+
+            <span class="c1"># check convergence</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="n">obs</span> <span class="o">-</span> <span class="n">state_in_obsspace</span>
+            <span class="n">misfit_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">misfit_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">misfit_norm</span><span class="p">)</span>
+
+            <span class="c1"># inflation</span>
+            <span class="k">if</span> <span class="n">inverse</span><span class="o">.</span><span class="n">inflation_flag</span> <span class="ow">and</span> <span class="n">misfit_list</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">misfit_list</span><span class="p">[</span><span class="n">iteration</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="nb">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tdir</span><span class="p">,</span> <span class="s1">&#39;xf&#39;</span><span class="p">)</span>
+                <span class="n">state_forecast</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">dir</span> <span class="o">+</span> <span class="s1">&#39;/xf_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">iteration</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span> <span class="c1"># TODO: put 5 in inputfile</span>
+                    <span class="c1"># log</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;      Inner iteration: </span><span class="si">{</span><span class="n">loop</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">inverse</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">inverse</span><span class="o">.</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">inverse</span><span class="o">.</span><span class="n">alpha</span>
+                    <span class="nb">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tdir</span><span class="p">,</span> <span class="s1">&#39;Hx&#39;</span><span class="p">)</span>
+                    <span class="n">state_in_obsspace</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">dir</span> <span class="o">+</span> <span class="s1">&#39;/Hx_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">iteration</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="c1"># model.state_to_observation(state_forecast)</span>
+
+                    <span class="c1"># perturb observations</span>
+                    <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;perturb_obs_option&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;iter&#39;</span><span class="p">:</span>
+                        <span class="n">obs</span><span class="p">,</span> <span class="n">obs_perturbation</span> <span class="o">=</span> <span class="n">_perturb_vec</span><span class="p">(</span>
+                            <span class="n">obs_vec</span><span class="p">,</span> <span class="n">obs_error</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">])</span>
+
+                    <span class="n">diff</span> <span class="o">=</span> <span class="n">obs</span> <span class="o">-</span> <span class="n">state_in_obsspace</span>
+                    <span class="n">misfit_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">misfit_norm</span> <span class="o">&lt;</span> <span class="n">misfit_list</span><span class="p">[</span><span class="n">iteration</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">misfit_list</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">misfit_norm</span>
+                        <span class="k">break</span>
+                    <span class="n">state_analysis</span> <span class="o">=</span> <span class="n">inverse</span><span class="o">.</span><span class="n">analysis</span><span class="p">(</span>
+                        <span class="n">iteration</span><span class="p">,</span> <span class="n">state_forecast</span><span class="p">,</span> <span class="n">state_in_obsspace</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">obs_error</span><span class="p">,</span>
+                        <span class="n">obs_vec</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;      misfit = ... </span><span class="si">{</span><span class="n">misfit_norm</span><span class="si">}</span><span class="s1">s&#39;</span><span class="p">)</span>
+
+            <span class="n">conv</span><span class="p">,</span> <span class="n">log_message</span><span class="p">,</span> <span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">noise</span><span class="p">)</span> <span class="o">=</span> <span class="n">_convergence</span><span class="p">(</span>
+                <span class="n">misfit_list</span><span class="p">,</span> <span class="n">obs_error</span><span class="p">,</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;convergence_factor&#39;</span><span class="p">],</span>
+                <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;convergence_residual&#39;</span><span class="p">],</span>
+                <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;convergence_option&#39;</span><span class="p">])</span>
+            <span class="n">residual_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span>
+            <span class="n">noise_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">noise</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">iteration_array</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_log_level</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">log_message</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">conv</span> <span class="ow">and</span> <span class="p">(</span><span class="n">iteration</span> <span class="o">&lt;</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;max_iterations&#39;</span><span class="p">]):</span>
+                <span class="n">early_stop</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+
+        <span class="c1"># save inner loop convergence history</span>
+        <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;save_level&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;iter&#39;</span><span class="p">,</span> <span class="s1">&#39;debug&#39;</span><span class="p">}:</span>
+            <span class="n">convergence</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;misfit&#39;</span><span class="p">:</span> <span class="n">misfit_list</span><span class="p">,</span>
+                           <span class="s1">&#39;min_discrepancy&#39;</span><span class="p">:</span> <span class="n">noise_list</span><span class="p">,</span>
+                           <span class="s1">&#39;residual&#39;</span><span class="p">:</span> <span class="n">residual_list</span><span class="p">,</span>
+                           <span class="p">}</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">convergence</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tdir</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;iteration&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">iteration</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tdir</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="n">val</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># log inner loop summary</span>
+        <span class="k">if</span> <span class="n">early_stop</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;convergence, early stop.&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;max iteration reached.&quot;</span>
+        <span class="n">log_message</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  Inversion completed: &quot;</span> <span class="o">+</span> <span class="n">message</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_log_level</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">log_message</span><span class="p">)</span>
+
+        <span class="c1"># map analysis state to observation space and save</span>
+        <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;analysis_to_obs&#39;</span><span class="p">]:</span>
+            <span class="n">log_message</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  Mapping final analysis states &quot;</span> <span class="o">+</span> \
+                <span class="s2">&quot;to observation space.&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_log_level</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">log_message</span><span class="p">)</span>
+            <span class="n">state_in_obsspace</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">state_to_observation</span><span class="p">(</span><span class="n">state_analysis</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;save_level&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;iter&#39;</span><span class="p">,</span> <span class="s1">&#39;debug&#39;</span><span class="p">}:</span>
+                <span class="nb">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tdir</span><span class="p">,</span> <span class="s1">&#39;Hx&#39;</span><span class="p">)</span>
+                <span class="n">file</span> <span class="o">=</span> <span class="s1">&#39;Hxa&#39;</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">state_in_obsspace</span><span class="p">)</span>
+
+        <span class="c1"># save outer loop</span>
+        <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;save_level&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;iter&#39;</span><span class="p">,</span> <span class="s1">&#39;debug&#39;</span><span class="p">}:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">obs</span><span class="p">,</span>
+                       <span class="s1">&#39;Hx&#39;</span><span class="p">:</span> <span class="n">state_in_obsspace_prior</span><span class="p">,</span>
+                       <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="n">obs_error</span><span class="p">,</span>
+                       <span class="s1">&#39;xa&#39;</span><span class="p">:</span> <span class="n">state_analysis</span><span class="p">,</span>
+                       <span class="s1">&#39;xf&#39;</span><span class="p">:</span> <span class="n">state_prior</span>
+                       <span class="p">}</span>
+            <span class="k">if</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;analysis_to_obs&#39;</span><span class="p">]:</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;Hxa&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_in_obsspace</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;save_dir&#39;</span><span class="p">],</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">_create_dir</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+                <span class="n">file</span> <span class="o">=</span> <span class="n">key</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;_</span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="c1"># model cleanup</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="s1">&#39;iter&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># collect output</span>
+        <span class="n">state_analysis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state_analysis</span><span class="p">)</span>
+
+    <span class="c1"># model cleanup</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">state_analysis_list</span>
+
+
+<span class="k">def</span> <span class="nf">_convergence</span><span class="p">(</span><span class="n">misfit_list</span><span class="p">,</span> <span class="n">obs_error</span><span class="p">,</span> <span class="n">noise_factor</span><span class="p">,</span> <span class="n">min_residual</span><span class="p">,</span> <span class="n">option</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Calculate convergence metrics.</span>
+
+<span class="sd">    Also returns convergence decision and log message.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convergence: discrepancy principle</span>
+    <span class="n">noise_level</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">obs_error</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">noise_factor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">conv_discrepancy</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">noise_criteria</span> <span class="o">=</span> <span class="n">noise_factor</span> <span class="o">*</span> <span class="n">noise_level</span>
+        <span class="n">conv_discrepancy</span> <span class="o">=</span> <span class="n">misfit_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">noise_criteria</span>
+
+    <span class="c1"># Convergence: residual of misfit</span>
+    <span class="n">iteration</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">misfit_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">iteration</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">misfit_list</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">-</span> <span class="n">misfit_list</span><span class="p">[</span><span class="n">iteration</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">residual</span> <span class="o">/=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">misfit_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">if</span> <span class="n">min_residual</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">conv_residual</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">conv_residual</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">&lt;</span> <span class="n">min_residual</span>
+
+    <span class="c1"># Convergence</span>
+    <span class="k">if</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+        <span class="n">conv</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;discrepancy&#39;</span><span class="p">:</span>
+        <span class="n">conv</span> <span class="o">=</span> <span class="n">conv_discrepancy</span>
+    <span class="k">elif</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;residual&#39;</span><span class="p">:</span>
+        <span class="n">conv</span> <span class="o">=</span> <span class="n">conv_residual</span>
+
+    <span class="c1"># log</span>
+    <span class="n">log_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;    Convergence (variance): </span><span class="si">{</span><span class="n">conv_discrepancy</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">log_message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">      Norm of misfit: </span><span class="si">{</span><span class="n">misfit_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">log_message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">      Noise level: </span><span class="si">{</span><span class="n">noise_criteria</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">log_message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    Convergence (residual): </span><span class="si">{</span><span class="n">conv_residual</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">log_message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">      Relative iterative residual: </span><span class="si">{</span><span class="n">residual</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">log_message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">       Relative convergence criterion: </span><span class="si">{</span><span class="n">min_residual</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="n">conv</span><span class="p">,</span> <span class="n">log_message</span><span class="p">,</span> <span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">noise_criteria</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_log_level</span><span class="p">(</span><span class="n">verbosity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return log level for specified verbosity level. &quot;&quot;&quot;</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Verbosity should be between -2 and 9&#39;</span>
+    <span class="k">if</span> <span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+        <span class="n">verbosity</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="k">elif</span> <span class="n">verbosity</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+        <span class="n">verbosity</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="mi">29</span> <span class="o">-</span> <span class="n">verbosity</span>
+    <span class="k">return</span> <span class="n">level</span>
+
+
+<span class="k">def</span> <span class="nf">_perturb_vec</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">nsamps</span><span class="p">,</span> <span class="n">perturb_diag</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create samples of a random vector.</span>
+
+<span class="sd">    Uses a multivariate Gaussian distribution.</span>
+<span class="sd">    Returns matrix of samples where each column is a sample.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
+    <span class="c1"># check symmetric</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">cov</span><span class="o">.</span><span class="n">T</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Covariance matrix is not symmetric.&#39;</span><span class="p">)</span>
+    <span class="c1"># add small value to diagonal for numerical stability of Cholesky decomp.</span>
+    <span class="n">cov</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span><span class="o">*</span><span class="n">perturb_diag</span>
+    <span class="c1"># Cholesky decomposition</span>
+    <span class="n">l_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+    <span class="c1"># create correlated perturbations</span>
+    <span class="n">x_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">nsamps</span><span class="p">))</span>
+    <span class="n">perturb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">l_mat</span><span class="p">,</span> <span class="n">x_mat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="p">(</span><span class="n">nsamps</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">perturb</span><span class="p">,</span> <span class="n">perturb</span>
+
+
+<span class="k">def</span> <span class="nf">_create_dir</span><span class="p">(</span><span class="nb">dir</span><span class="p">,):</span>
+    <span class="sd">&quot;&quot;&quot; Create directory if it does not exist. &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2020 Virginia Polytechnic Institute and State University..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

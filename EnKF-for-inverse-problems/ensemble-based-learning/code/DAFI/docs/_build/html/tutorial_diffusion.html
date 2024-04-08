@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial: Diffusion &mdash; dafi 1.0.0 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Source Code" href="source_code.html" />
+    <link rel="prev" title="Tutorial: Lorenz63" href="tutorial_lorenz.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> dafi
+          </a>
+              <div class="version">
+                1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_lorenz.html">Tutorial: Lorenz63</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: Diffusion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#problem-description">Problem Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#field-representation">Field Representation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-the-dynamic-model">Building the Dynamic Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#diffusion-model-files">Diffusion Model Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#init-and-input-file">__init__ and input file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthetic-observations">synthetic observations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-ensemble">generate_ensemble</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#state-to-observation">state_to_observation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-obs">get_obs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-code">Running the code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source_code.html">Source Code</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">dafi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Tutorial: Diffusion</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tutorial_diffusion.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="tutorial-diffusion">
+<h1>Tutorial: Diffusion<a class="headerlink" href="#tutorial-diffusion" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="problem-description">
+<h2>Problem Description<a class="headerlink" href="#problem-description" title="Permalink to this headline">¶</a></h2>
+<p>In this tutorial, we will focus on one dimension steady-state field inversion problem based on the heat diffusion equation. The equation for a rod can be expressed as following:</p>
+<div class="math notranslate nohighlight">
+\[- \frac{d}{dx}(\mu \frac{du}{dx}) = f(x) \qquad x \in [0, 1]\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mu\)</span> are unknown thermal diffusivity to be infered varying with the location in the rod, <span class="math notranslate nohighlight">\(u\)</span> is the temperature and <span class="math notranslate nohighlight">\(f(x)\)</span> is external heat source term which in this case is simplfied as <span class="math notranslate nohighlight">\(f(x) = sin( 0.2 \pi x)\)</span>.</p>
+<p>To solve the diffusion equation, the central difference scheme is used. The finite difference method is applied to replace the partial derivation of diffusivity in equation.</p>
+<div class="math notranslate nohighlight">
+\[- \frac{d}{dx}(\mu \frac{du}{dx}) = -\frac{d\mu}{dx} \frac{du}{dx}+\mu\frac{du^2}{d^2x}=f(x)\]</div>
+<p>with</p>
+<div class="math notranslate nohighlight">
+\[\frac{du_i}{dx} = \frac{u_{i+1}-u_{i-1}}{2\Delta x}\]</div>
+<div class="math notranslate nohighlight">
+\[\frac{du^2}{d^2x} = \frac{u_{i+1}-2u_i+u_{i-1}}{\Delta x^2}\]</div>
+<p>The difference scheme can be expressed as below:</p>
+<div class="math notranslate nohighlight">
+\[(\frac{1}{2\Delta x}\frac{\mu_{i+1}-\mu_{i}}{\Delta x} + \frac{\mu_i}{\Delta x^2})u_{i+1} + (-\frac{2\mu_i}{\Delta x^2})\mu_i+(-\frac{1}{2\Delta x}\frac{\mu_{i+1}-\mu_{i}}{\Delta x} + \frac{\mu_i}{\Delta x^2}) u_{i-1} = f(x_i)\]</div>
+<p>Further this can be simplified to be written as</p>
+<div class="math notranslate nohighlight">
+\[A_i u_{i+1} + B_i u_i + C_i u_{i-1} = f(x_i)\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}A_i = \frac{1}{2 \Delta x} \frac{d \mu_i}{d x} + \frac{\mu_i}{\Delta x^2};\\B_i = -\frac{2\mu_i}{\Delta x^2};\\C_i = -\frac{1}{2\Delta x} \frac{d \mu_i}{d x} + \frac{\mu_i}{\Delta x^2}\end{aligned}\end{align} \]</div>
+<p>The first derivative of the diffusivity <span class="math notranslate nohighlight">\(\frac{d \mu}{dx}\)</span> is calculated using central difference.
+Finally, the scheme can be formulated in the matrix form as</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}Du = E, \text{and further}\\u = D^{-1} E\end{aligned}\end{align} \]</div>
+<p>where <span class="math notranslate nohighlight">\(D\)</span> is a tridiagonal matrix and E is a vector.
+The space in this case is evenly devided into 100 mesh cells, and accordingly, the spatial interval is 0.01.</p>
+</div>
+<div class="section" id="field-representation">
+<h2>Field Representation<a class="headerlink" href="#field-representation" title="Permalink to this headline">¶</a></h2>
+<p>Field inversion problem is of great interest in reality, however to infer a field based on sparse observation also increases the ill-posedness of the problem. The high dimensionalty comparing to the limited number of samples will lead to the ununiqueness of the solution.</p>
+<p>Therefore it is necessary to reduce the dimensionality to indirectly characterize the field. To represent the field, the most widely used method is Karhunen-Loeve expansion which is commonly used to represent the stochatic process through a combination of a set of orthogonal functions. In this case, the method is leveraged to reduce the dimension of state varibles.</p>
+<p>The field of diffusivity is reconstructed by a set of deterministic functions with corresponding random variables:</p>
+<div class="math notranslate nohighlight">
+\[log(\hat{\mu}(x)) = \sum_{i=1}^m \omega_i \phi_i(x)\]</div>
+<p>where the subscript indicates the <span class="math notranslate nohighlight">\(i\)</span> th mode <span class="math notranslate nohighlight">\(\omega_i\)</span>, is a random variable, <span class="math notranslate nohighlight">\(\phi_i(x)\)</span> is the deterministic basis set, the <span class="math notranslate nohighlight">\(\hat{\mu}\)</span> is the diffusivity normed by the prior, and the logarithm is to ensure the non-negativity of diffusivity.
+Accordingly, the first derivative of the <span class="math notranslate nohighlight">\(\hat{\mu}\)</span> can be written as</p>
+<div class="math notranslate nohighlight">
+\[\frac{d \hat{\mu}}{d x} = \hat{\mu}(x) * \sum_{i=1}^m \omega_i \frac{d \phi_i(x)}{dx}\]</div>
+<p>The prior of <span class="math notranslate nohighlight">\(\mu(x)\)</span> is regarded as Gaussian random fields, where the covariance of two different location (kernel function) is described as:</p>
+<div class="math notranslate nohighlight">
+\[K(x,x')=\sigma(x)\sigma(x')\text{exp}\left(-\frac{|x-x'|^2}{l^2}\right)\]</div>
+<p>The prior variance <span class="math notranslate nohighlight">\(\sigma(x)\)</span> is a constant or a spatially varying field. In this tutorial, it is chosen as 0.5.</p>
+<p>The correction length scale <span class="math notranslate nohighlight">\(l\)</span> is simplified as 0.02 in this tutorial.</p>
+<p>The orthogonal basis function <span class="math notranslate nohighlight">\(\phi_i(x)\)</span> take the form <span class="math notranslate nohighlight">\(\phi_i(x)=\sqrt{\hat{\lambda}_i}\hat{\phi_i}(x)\)</span>, where <span class="math notranslate nohighlight">\(\hat{\lambda}_i\)</span> and <span class="math notranslate nohighlight">\(\hat{\phi}_i(x)\)</span> are the eigenvalues and eigenvectors, respectively, of the kernel <span class="math notranslate nohighlight">\(K\)</span> computed from the Fredholm integral equation:</p>
+<div class="math notranslate nohighlight">
+\[\int K(x,x')\hat{\phi}(x')dx' = \hat{\lambda}\hat{\phi}(x)\]</div>
+<p>Thus we can obtain the diffusivity field through infering the randomized value <span class="math notranslate nohighlight">\(\omega_i\)</span> based on the observation on temperature.</p>
+</div>
+<div class="section" id="building-the-dynamic-model">
+<h2>Building the Dynamic Model<a class="headerlink" href="#building-the-dynamic-model" title="Permalink to this headline">¶</a></h2>
+<p>To create a new dynamic model you need to create a python file in the folder “tutorials/diffusion/”. The python script for diffusion model has been created in the “tutorials/diffusion/diffusion.py”</p>
+<div class="section" id="diffusion-model-files">
+<h3>Diffusion Model Files<a class="headerlink" href="#diffusion-model-files" title="Permalink to this headline">¶</a></h3>
+<p>Below is an overview of the files required to run the data assimilation for diffusion model in DAFI. The required files are listed below.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 38%" />
+<col style="width: 38%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>File Type</strong></p></td>
+<td><p><strong>File Name</strong></p></td>
+<td><p><strong>Directory</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Input File</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dafi.in</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/tutorials/diffusion</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Input File</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">diffusion.in</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/tutorials/diffusion</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Forward Model</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">diffusion.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/tutorials/diffusion</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>We start by importing all necessary packages. Note that we are importing some things from dafi:</p>
+<ul class="simple">
+<li><p><em>PhysicsModel</em> class</p></li>
+<li><p><em>random field</em> class</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># standard library imports</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># third party imports</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+
+<span class="c1"># local imports</span>
+<span class="kn">from</span> <span class="nn">dafi</span> <span class="kn">import</span> <span class="n">PhysicsModel</span>
+<span class="kn">from</span> <span class="nn">dafi</span> <span class="kn">import</span> <span class="n">random_field</span> <span class="k">as</span> <span class="n">rf</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="init-and-input-file">
+<h3>__init__ and input file<a class="headerlink" href="#init-and-input-file" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">init</span></code> function is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># save the main input</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span> <span class="o">=</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;nsamples&#39;</span><span class="p">]</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">max_iteration</span> <span class="o">=</span> <span class="n">inputs_dafi</span><span class="p">[</span><span class="s1">&#39;max_iterations&#39;</span><span class="p">]</span>
+
+<span class="c1"># required attributes</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;1D diffusion Equation&#39;</span>
+
+<span class="c1"># case properties</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">space_interval</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1"># counter for number of state_to_observation calls</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># read input file</span>
+<span class="n">input_file</span> <span class="o">=</span> <span class="n">inputs_model</span><span class="p">[</span><span class="s1">&#39;input_file&#39;</span><span class="p">]</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">inputs_model</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">yaml</span><span class="o">.</span><span class="n">SafeLoader</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">mu_init</span> <span class="o">=</span> <span class="n">inputs_model</span><span class="p">[</span><span class="s1">&#39;prior_mean&#39;</span><span class="p">]</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">stddev</span> <span class="o">=</span> <span class="n">inputs_model</span><span class="p">[</span><span class="s1">&#39;stddev&#39;</span><span class="p">]</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">length_scale</span> <span class="o">=</span> <span class="n">inputs_model</span><span class="p">[</span><span class="s1">&#39;length_scale&#39;</span><span class="p">]</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">obs_loc</span> <span class="o">=</span> <span class="n">inputs_model</span><span class="p">[</span><span class="s1">&#39;obs_locations&#39;</span><span class="p">]</span>
+<span class="n">obs_rel_std</span> <span class="o">=</span> <span class="n">inputs_model</span><span class="p">[</span><span class="s1">&#39;obs_rel_stddev&#39;</span><span class="p">]</span>
+<span class="n">obs_abs_std</span> <span class="o">=</span> <span class="n">inputs_model</span><span class="p">[</span><span class="s1">&#39;obs_abs_stddev&#39;</span><span class="p">]</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span> <span class="o">=</span> <span class="n">inputs_model</span><span class="p">[</span><span class="s1">&#39;nmodes&#39;</span><span class="p">]</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">calculate_kl_flag</span> <span class="o">=</span> <span class="n">inputs_model</span><span class="p">[</span><span class="s1">&#39;calculate_kl_flag&#39;</span><span class="p">]</span>
+
+<span class="c1"># create save directory</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">savedir</span> <span class="o">=</span> <span class="s1">&#39;./results_diffusion&#39;</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savedir</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savedir</span><span class="p">)</span>
+
+<span class="c1"># create spatial coordinate and save</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">x_coor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+    <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">space_interval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_interval</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savedir</span><span class="p">,</span> <span class="s1">&#39;x_coor.dat&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_coor</span><span class="p">)</span>
+
+<span class="c1"># dimension of state space</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">ncells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_coor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># create source term fx</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncells</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncells</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">source</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_coor</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mat</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">fx</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">A</span>
+
+<span class="c1"># create or read modes for K-L expansion</span>
+<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_kl_flag</span><span class="p">:</span>
+    <span class="c1"># covariance</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">covariance</span><span class="o">.</span><span class="n">generate_cov</span><span class="p">(</span>
+        <span class="s1">&#39;sqrexp&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stddev</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_coor</span><span class="p">,</span>
+        <span class="n">length_scales</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">length_scale</span><span class="p">])</span>
+    <span class="c1"># KL decomposition</span>
+    <span class="n">eig_vals</span><span class="p">,</span> <span class="n">kl_modes</span> <span class="o">=</span> <span class="n">rf</span><span class="o">.</span><span class="n">calc_kl_modes</span><span class="p">(</span>
+        <span class="n">cov</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_interval</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># save</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savedir</span><span class="p">,</span> <span class="s1">&#39;KLmodes.dat&#39;</span><span class="p">),</span> <span class="n">kl_modes</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savedir</span><span class="p">,</span> <span class="s1">&#39;eigVals.dat&#39;</span><span class="p">),</span> <span class="n">eig_vals</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savedir</span><span class="p">,</span> <span class="s1">&#39;eigValsNorm.dat&#39;</span><span class="p">),</span>
+               <span class="n">eig_vals</span><span class="o">/</span><span class="n">eig_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">kl_modes</span> <span class="o">=</span> <span class="n">kl_modes</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">kl_modes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;KLmodes.dat&#39;</span><span class="p">)</span>
+
+<span class="c1"># create observations</span>
+<span class="n">true_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_truth</span><span class="p">()</span>
+<span class="n">std_obs</span> <span class="o">=</span> <span class="n">obs_rel_std</span> <span class="o">*</span> <span class="n">true_obs</span> <span class="o">+</span> <span class="n">obs_abs_std</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">obs_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">std_obs</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">true_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_error</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">nobs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These inputs to the <code class="docutils literal notranslate"><span class="pre">__init__</span> <span class="pre">method</span></code> are the list in the dafi input file (<em>inputs_dafi</em>) and the name for the dynamic model input file (<em>inputs_model</em>).</p>
+<p>The model input file is created as <code class="docutils literal notranslate"><span class="pre">diffusion.in</span></code>. In the input file, we define the required parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+<span class="c1"># prior distribution (diffusivity)</span>
+<span class="n">prior_mean</span><span class="p">:</span> <span class="mf">0.8</span>
+<span class="n">stddev</span><span class="p">:</span> <span class="mf">0.5</span>
+<span class="n">length_scale</span><span class="p">:</span>  <span class="mf">0.1</span>
+
+<span class="c1"># Observations</span>
+<span class="n">obs_locations</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">]</span>
+<span class="n">obs_rel_stddev</span><span class="p">:</span> <span class="mf">0.01</span>
+<span class="n">obs_abs_stddev</span><span class="p">:</span> <span class="mf">0.0001</span>
+
+<span class="c1"># KL modes options</span>
+<span class="n">nmodes</span><span class="p">:</span> <span class="mi">15</span>
+</pre></div>
+</div>
+<p>In the input file, we specify the first guessed constant diffusivity, the field variance and the characteristic length scale to construct a random field.
+Then we define the observation locations and the relative and absolute standard deviation for the observation.
+Also, we specify the number of modes to represent the field.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>With more modes, we can represent the field more flexiblely. However if the field is a low order curve, the results will lead to worse when introducing too many modes.</p>
+</div>
+</div>
+<div class="section" id="synthetic-observations">
+<h3>synthetic observations<a class="headerlink" href="#synthetic-observations" title="Permalink to this headline">¶</a></h3>
+<p>We give a synthetic truth on the KL coefficient as:</p>
+<div class="math notranslate nohighlight">
+\[\hat{\mu} = \sum_{i=1}^3 \omega_i \phi_i(x)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{\omega}=[1,1,1]\)</span>
+The synthetic observation on the temperature is obtained by soliving the diffusion equation with the synthectic <span class="math notranslate nohighlight">\(\mu\)</span>.</p>
+</div>
+<div class="section" id="generate-ensemble">
+<h3>generate_ensemble<a class="headerlink" href="#generate-ensemble" title="Permalink to this headline">¶</a></h3>
+<p>Now we start coding the required methods, starting with generate_ensemble.
+This method is responsible for creating the initial distribution of states.
+In this case, the state is the KL coefficient.
+We are going to do this by assuming independent zero-mean uni-variance Gaussian distributions.
+We generate the specified number of samples. The generated prior samples are shown in figures below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="_images/DA_u_prior.png"><img alt="_images/DA_u_prior.png" src="_images/DA_u_prior.png" style="width: 400pt;" /></a>
+</div>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="_images/DA_mu_prior.png"><img alt="_images/DA_mu_prior.png" src="_images/DA_mu_prior.png" style="width: 400pt;" /></a>
+</div>
+</div>
+<div class="section" id="state-to-observation">
+<h3>state_to_observation<a class="headerlink" href="#state-to-observation" title="Permalink to this headline">¶</a></h3>
+<p>This method is to map the state to observation (i.e., temperature). The temperature is obtained by calling a private function <code class="docutils literal notranslate"><span class="pre">_solve_diffusion_equation</span></code> to solve the diffusion problem with given diffusivity. Further, The temperature value at the observation locations specified in the input file can be interpolated and taken as the model output to be analyzed with observations.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="n">u_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ncells</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">])</span>
+<span class="n">model_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">nobs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">])</span>
+<span class="c1"># solve model in observation space for each sample</span>
+<span class="k">for</span> <span class="n">isample</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">):</span>
+    <span class="n">mu</span><span class="p">,</span> <span class="n">mu_dot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_mu_mudot</span><span class="p">(</span><span class="n">state_vec</span><span class="p">[:,</span> <span class="n">isample</span><span class="p">])</span>
+    <span class="n">u_vec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_diffusion_equation</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">mu_dot</span><span class="p">)</span>
+    <span class="n">model_obs</span><span class="p">[:,</span> <span class="n">isample</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_loc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_coor</span><span class="p">,</span> <span class="n">u_vec</span><span class="p">)</span>
+    <span class="n">u_mat</span><span class="p">[:,</span> <span class="n">isample</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_vec</span>
+<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savedir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;U.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">counter</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">u_mat</span><span class="p">)</span>
+<span class="k">return</span> <span class="n">model_obs</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="get-obs">
+<h3>get_obs<a class="headerlink" href="#get-obs" title="Permalink to this headline">¶</a></h3>
+<p>This method is to return the observation and the observation error matrix. In the <code class="docutils literal notranslate"><span class="pre">init</span></code> method, the synthetic truth
+in the termperature is obtained by calling a private function “_truth()”. Further, the value at the specified obervation position is obtained and taken as the observation. The observation error covariance is generated based on the specified standard deviation of the observation in the input file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">nmodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="running-the-code">
+<h2>Running the code<a class="headerlink" href="#running-the-code" title="Permalink to this headline">¶</a></h2>
+<p>Now that we have created our own dynamic model, and an input file for our specific case, we can run the <code class="docutils literal notranslate"><span class="pre">/bin/dafi</span></code> data assimilation code.
+In order to run the code you will need to export the path of dafi files if you haven’t already.
+This is done as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;&lt;DAFI_DIR&gt;:$PYTHONPATH&quot;</span>
+<span class="n">export</span> <span class="n">PATH</span><span class="o">=</span><span class="s2">&quot;&lt;DAFI_DIR&gt;/bin:$PATH&quot;</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;DAFI_DIR&gt;</span></code> is replaced with the correct path to the DAFI directory.</p>
+<p>Then we can create the dafi input file ‘dafi.in’ to specify self-defined parameters. The ‘dafi.in’ file is provided in the diffusion tutorial directory and shown below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+<span class="n">dafi</span><span class="p">:</span>
+    <span class="n">model_file</span><span class="p">:</span> <span class="n">diffusion</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">inverse_method</span><span class="p">:</span> <span class="n">EnKF</span>
+    <span class="n">nsamples</span><span class="p">:</span> <span class="mi">100</span>
+    <span class="n">max_iterations</span><span class="p">:</span> <span class="mi">20</span>
+    <span class="n">verbosity</span><span class="p">:</span> <span class="mi">3</span>
+    <span class="n">convergence_option</span><span class="p">:</span> <span class="n">discrepancy</span>
+    <span class="n">convergence_factor</span><span class="p">:</span> <span class="mf">1.0</span>
+    <span class="n">save_level</span><span class="p">:</span> <span class="nb">iter</span>
+    <span class="n">save_dir</span><span class="p">:</span> <span class="n">results</span>
+    <span class="n">analysis_to_obs</span><span class="p">:</span> <span class="kc">True</span>
+
+<span class="n">inverse</span><span class="p">:</span>
+
+<span class="n">model</span><span class="p">:</span>
+    <span class="n">input_file</span><span class="p">:</span> <span class="n">diffusion</span><span class="o">.</span><span class="ow">in</span>
+</pre></div>
+</div>
+<p>In this file, we need to specify the number of samples (nsamples), the maximum data assimilation iteration(max_iteration) and so on.</p>
+<p>Finally, we can execute the data assimilation for diffusion system by typing code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dafi</span><span class="o">.</span><span class="n">py</span> <span class="n">dafi</span><span class="o">.</span><span class="ow">in</span>
+</pre></div>
+</div>
+<p>Information on the progress will be printed to the screen. The results are saved to the results_dafi directory, and we had our dynamic model save some results to results_diffusion as well.</p>
+<p>‘diffusion_plot.py’ (located in ‘$tutorials/diffusion’) is the postprocessing file to plot the inferred and observed field.</p>
+<p>The data assimilation is complete! We have provided a post-processing script to visualize these results.
+To execute the postprocessing, type code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">plot_results</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>The plotted results are shown as below. Users can modify the ‘diffusion_plot.py’ for their own post-processing.</p>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="_images/DA_u_posterior.png"><img alt="_images/DA_u_posterior.png" src="_images/DA_u_posterior.png" style="width: 400pt;" /></a>
+</div>
+<div class="figure align-default">
+<a class="reference internal image-reference" href="_images/DA_mu_posterior.png"><img alt="_images/DA_mu_posterior.png" src="_images/DA_mu_posterior.png" style="width: 400pt;" /></a>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial_lorenz.html" class="btn btn-neutral float-left" title="Tutorial: Lorenz63" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="source_code.html" class="btn btn-neutral float-right" title="Source Code" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2020 Virginia Polytechnic Institute and State University..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

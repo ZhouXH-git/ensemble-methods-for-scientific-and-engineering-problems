@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+# Copyright 2020 Virginia Polytechnic Institute and State University.
+
+# NOTE: Manually make changes in docs/_source/safi_exec.rst
+""" DAFI main executable.
+
+Parses the input file and runs ``dafi.run()``.
+Saves the DAFI version (Git commit hash) and the run time to hidden
+files (*'.dafi_ver'* and *'.time'*, respectively).
+
+**Example**
+
+.. code-block:: python
+
+    >>> dafi <input_file>
+
+**Input File**
+    The input file is written using yaml syntax.
+    The input file contains the following three dictionaries:
+
+    * **dafi** (required) - see :py:func:`dafi.main.run` for inputs.
+    * **inverse** - see inputs in chosen inverse method in
+      :py:mod:`dafi.inverse`. This corresponds to the *'inputs_inverse'*
+      input to :py:func:`dafi.main.run`.
+    * **model** - inputs as required by user-provided physics model.
+      This corresponds to the *'inputs_model'* input to
+      :py:func:`dafi.main.run`.
+"""
+
+# standard library imports
+import os
+import subprocess
+import argparse
+import time
+
+# third party imports
+import yaml
+
+# local imports
+import dafi
+
+
+VERSION_FILENAME = '.dafi_ver'
+TIME_FILENAME = '.time'
+
+
+def _parse_args():
+    """ Parse the commandline inputs. """
+    parser = argparse.ArgumentParser(description='Run DAFI.')
+    parser.add_argument('input_file', help='Name (path) of input file')
+    return parser.parse_args()
+
+
+def _get_code_version():
+    """ Save the Git version of DAFI if running as a developer.
+
+    The Git commit hash is saved to a hidden file named ``.dafi_ver``.
+
+    Returns
+    -------
+    success : bool
+        Whether the Git commit hash was succesfully retrieved and saved.
+    """
+    git_dir = os.path.dirname(os.path.realpath(__file__))
+    cwd = os.getcwd()
+    file = os.path.join(cwd, VERSION_FILENAME)
+    bash_command = f'cd {git_dir}; ' + \
+                   f'git rev-parse HEAD > {file}; ' + \
+                   f'cd {cwd}; '
+    success = False
+    try:
+        subprocess.check_call(
+            bash_command, stderr=subprocess.DEVNULL, shell=True)
+        sucess = True
+    except subprocess.CalledProcessError:
+        # not a git directory
+        bash_command = f'rm {file}; cd {cwd}; '
+        subprocess.check_call(bash_command, shell=True)
+    except OSError:
+        # git command not found
+        pass
+    return success
+
+
+def _read_input(input_file):
+    """ Read the three input dictionaries from the input file.
+
+    These three dictionaries are (1) the DAFI inputs describing the
+    problem, (2) the inverse method specific inputs, and (3) the
+    physics model input. Refer to the ``dafi.run`` method for details.
+    """
+    with open(input_file, 'r') as f:
+        input_dict = yaml.load(f, yaml.SafeLoader)
+    # dafi inputs
+    inputs_dafi = input_dict['dafi']
+    inputs_dafi['save_level'] = inputs_dafi.get('save_level', 'time')
+    # inverse method inputs
+    if 'inverse' not in input_dict or input_dict['inverse'] is None:
+        inputs_inverse = dict()
+    else:
+        inputs_inverse = input_dict['inverse']
+    # physics model inputs
+    if 'model' not in input_dict or input_dict['model'] is None:
+        inputs_model = dict()
+    else:
+        inputs_model = input_dict['model']
+    return inputs_dafi, inputs_inverse, inputs_model
+
+
+def _timed_run(function):
+    """ Run and time a function.
+
+    This is a function decorator. The execution time is saved to a
+    hidden file named ``.time``.
+    """
+    def wrapper(*args, **kwargs):
+        tic = time.time()
+        output = function(*args, **kwargs)
+        toc = time.time()
+        with open(TIME_FILENAME, "w") as text_file:
+            print(f"{toc-tic}", file=text_file)
+        return output
+    return wrapper
+
+
+if __name__ == "__main__":
+    # parse input file
+    args = _parse_args()
+    (inputs_dafi, inputs_inverse, inputs_model) = _read_input(args.input_file)
+    # write DAFI version
+    _ = _get_code_version()
+    # run and time DAFI
+    dafi.run = _timed_run(dafi.run)
+    _ = dafi.run(**inputs_dafi,
+                 inputs_inverse=inputs_inverse,
+                 inputs_model=inputs_model)
