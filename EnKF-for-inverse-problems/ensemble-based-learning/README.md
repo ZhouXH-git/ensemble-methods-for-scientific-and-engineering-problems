@@ -45,7 +45,19 @@ we can make a local copy of the entire TurbulenceModels directory from OpenFOAM 
   cp -r $DDTM/code/foam/TurbulenceModels/nonlinear incompressible/turbulentTransportModels/RAS
   
   # manually add the new model to the compile list
-  # add the following line to the file 'incompressible/Make/files':
-  turbulentTransportModels/RAS/myNonLinearModel/myNonLinearModel.C
+  # add the following line to the file 'incompressible/Make/files', using kOmegaQuadratic for ASJ case for example:
+  turbulentTransportModels/RAS/nonlinear/kOmegaQuadratic/kOmegaQuadratic.C
+  ```
+  List of non-linear models: neural network + read g1 - g4 files
+  - **kOmegaQuadratic**: quadratic k-omega for training, reads fixed 'g1'-'g4' files
+  
+  If you want to develop new or modify these turbulence models, be cautious about the ".C" and ".h" files!
+
+- Re-make the turbulence models
+  ```bash
+  # compile again
+  # wmakeLnInclude: create an lnInclude directory for the available turbulence models
+  wmakeLnInclude -u turbulenceModels
+  ./Allwmake
   ```
   
