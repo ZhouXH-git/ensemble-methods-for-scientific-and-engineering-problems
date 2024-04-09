@@ -5,17 +5,23 @@ Requires OpenFOAM v1912, [DAFI](https://github.com/xiaoh/DAFI), and [Data Driven
 ### OpenFOAM installation
 - Follow steps in [OF1912 Install](https://www.cemf.ir/how-to-install-openfoam-v1912-from-source-pack/)
 - After installation, source the OpenFOAM 1912 by adding the following line in your `~/.bashrc` file:
-  <br>`alias of1912 = "source $HOME/OpenFOAM/OpenFOAM-v1912/etc/bashrc"`
+  ```bash
+  alias of1912 = "source $HOME/OpenFOAM/OpenFOAM-v1912/etc/bashrc"
+  ```
 
 ### DAFI installation
 - Source DAFI init file by adding following line in your `~/.bashrc` file:
-  <br>`source $HOME/ensemble-based-learning/code/DAFI/init_dafi`
+  ```bash
+  source $HOME/ensemble-based-learning/code/DAFI/init_dafi
+  ```
 
 ### TensorFlow setup
 - Install TensorFlow for C, see [TensorFlow for C](https://tensorflow.google.cn/install/lang_c#linux)
 - Install TensorFlow:
-  <br> `pip install --upgrade tensorflow`
-  <br> `pip install tensorflow-cpu`
+  ```bash
+  pip install --upgrade tensorflow
+  pip install tensorflow-cpu
+  ```
 
 ### Data-driven turbulence modeling (DDTM) setup
 *Notice*: Turbulence models in OpenFOAM are templated and therefore you cannot compile (new) turbulence models individually. Instead,
